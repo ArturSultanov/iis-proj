@@ -1,17 +1,14 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from fastapi import FastAPI
 
-class helloHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write("Hello world!".encode())
+app = FastAPI()
 
-def main():
-    PORT = 8000
-    server = HTTPServer(('', PORT), helloHandler)
-    print("Server running on port %s" % PORT)
-    server.serve_forever()
 
-if __name__ == '__main__':
-    main()
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.get("/hello/{name}")
+async def say_hello(name: str):
+    return {"message": f"Hello {name}"}
+
