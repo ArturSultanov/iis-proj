@@ -6,6 +6,8 @@ find . -type d -name "__pycache__" -exec rm -rf {} +
 
 # Check if a virtual environment already exists
 if [[ -d ".venv" ]]; then
+    echo "Environment already exists."
+echo
     echo "Creating a new virtual env..."
     python3 -m venv .venv
 fi
