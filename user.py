@@ -1,22 +1,16 @@
-import bcrypt
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
-from typing_extensions import Self
 
 from database import db_dependency
-from db_models import UsersOrm
+from db_models import UsersOrm, Role
+from password import hash_password
 
-tokens_session = {}
-
-user = APIRouter(prefix="/user", tags=["user"])
+user_router = APIRouter(prefix="/user", tags=["user"])
 
 templates = Jinja2Templates(directory="templates")
-
-salt = b'$2b$12$wE.fRv4cUoMjU45RIn2iD.'
 
 class RegisterFormIn(BaseModel):
     name: str = Form(...)
@@ -39,14 +33,20 @@ class Token(BaseModel):
 def create_token(username: str):
     return username
 
-def get_cookie(request: Request):
-    return request.cookies.get("access_token")
+def user_from_cookie(request: Request, db: db_dependency) -> UsersOrm | None:
+    token = request.cookies.get("access_token") # todo token is username now!!
+    user = UsersOrm.get_user(db, token)
+    if not user:
+        return None
+    if user.disabled:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is disabled")
+    return user
 
-@user.get("/signup", status_code=status.HTTP_200_OK)
+@user_router.get("/signup", status_code=status.HTTP_200_OK)
 async def register_page(request: Request):
     return templates.TemplateResponse("signup.html", {"request": request})
 
-@user.post("/signup", status_code=status.HTTP_201_CREATED)
+@user_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def register_user(db: db_dependency, form: RegisterFormIn):
     try:
         form.validate_password()
@@ -56,39 +56,45 @@ async def register_user(db: db_dependency, form: RegisterFormIn):
     if UsersOrm.get_user(db, form.username):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User with such username already exists")
 
-    new_user = UsersOrm(username=form.username, password=bcrypt.hashpw(form.password.encode('utf-8'), salt).decode('utf-8'))
+    new_user = UsersOrm(username=form.username,
+                        name=form.name,
+                        password=hash_password(form.password))
     db.add(new_user)
     db.commit()
 
 
-@user.get("/signin", status_code=status.HTTP_200_OK)
+@user_router.get("/signin", status_code=status.HTTP_200_OK)
 async def login_page(request: Request):
     return templates.TemplateResponse("signin.html", {"request": request})
 
-@user.post("/signin", status_code=status.HTTP_200_OK)
+@user_router.post("/signin", status_code=status.HTTP_200_OK)
 async def login_user(db: db_dependency, form: LoginFormIn):
     user = UsersOrm.get_user(db, form.username)
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
 
-    if user.password != bcrypt.hashpw(form.password.encode('utf-8'), salt).decode('utf-8'):
+    if user.password != hash_password(form.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password")
+
+    if user.disabled:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is disabled")
 
     token = create_token(form.username)
     response = JSONResponse(content={"access_token": token, "token_type": "bearer"})
     response.set_cookie(key="access_token", value=token)
-    tokens_session[token] = form.username
     return response
 
-@user.post("/logout", status_code=status.HTTP_200_OK)
+@user_router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout_user():
     response = JSONResponse(content={"message": "Logged out"})
     response.delete_cookie(key="access_token")
     return response
 
-@user.get("/profile", status_code=status.HTTP_200_OK)
-async def profile_page(request: Request, token: str = Depends(get_cookie)):
-    if token not in tokens_session:
+@user_router.get("/profile", status_code=status.HTTP_200_OK)
+async def profile_page(request: Request, logged_user: UsersOrm = Depends(user_from_cookie)):
+    if not logged_user:
         return RedirectResponse(url="/user/signin")
-    return templates.TemplateResponse("profile.html", {"request": request, "username": tokens_session[token]})
+    # if logged_user.role == Role.admin:
+    #     return RedirectResponse(url="/admin/dashboard")
+    return templates.TemplateResponse("profile.html", {"request": request, "user": logged_user})
 

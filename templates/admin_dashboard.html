@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin dashboard</title>
+</head>
+<body>
+<h1>Admin dashboard</h1>
+<p>Welcome, <span id="name">{{ admin.name }}</span></p>
+<p>Your username: <span id="role">{{ admin.username }}</span></p>
+<a href="/admin/users" class="link">Users</a>
+<a href="/admin/animals" class="link">Animals</a>
+<a href="/admin/adoptions" class="link">Adoptions</a>
+<br>
+<button id="logout">Logout</button>
+</body>
+<script src="../static/logout.js"></script>
+</html>

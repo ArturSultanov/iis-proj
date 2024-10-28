@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Active</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr id="user-{{ user.id }}">
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.name }}</td>
+            <td>
+                <label>
+                    <select class="role-select" user_id="{{ user.id }}">
+                        {% for role in roles %}
+                            <option value="{{ role.value }}"
+                                    {% if role == user.role %}selected{% endif %}>{{ role.value }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input type="checkbox"
+                           class="active-checkbox"
+                           user_id="{{ user.id }}"
+                           {% if not user.disabled %}checked{% endif %}
+                           {% if user.id == admin.id %}disabled{% endif %}>
+                </label>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const activeCheckboxes = document.querySelectorAll('.active-checkbox');
+        activeCheckboxes.forEach(function (activeCheckbox) {
+            activeCheckbox.addEventListener('change', async function () {
+                const userId = activeCheckbox.getAttribute('user_id');
+                const active = !activeCheckbox.checked;
+
+                const response = await fetch(`/admin/users/${userId}/state?active=${active}`, {
+                    method: 'PATCH'
+                });
+
+                if (!response.ok) {
+                    alert('Failed to update active status');
+                }
+            });
+        });
+
+        const roleSelects = document.querySelectorAll('.role-select');
+        roleSelects.forEach(function (roleSelect) {
+            roleSelect.addEventListener('change', async function () {
+                const userId = roleSelect.getAttribute('user_id');
+                const role = roleSelect.value;
+
+                const response = await fetch(`/admin/users/${userId}/role?role=${role}`, {
+                    method: 'PATCH'
+                });
+
+                if (!response.ok) {
+                    alert('Failed to update role');
+                }
+            });
+        });
+    });
+</script>
+</html>

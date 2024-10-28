@@ -6,19 +6,12 @@
 </head>
 <body>
     <h1>Profile</h1>
-    <p>Welcome, <span id="username">{{ username }}</span></p>
+    <p>Welcome, <span id="name">{{ user.name }}</span></p>
+    <p>Your role: <span id="role">{{ user.role }}</span></p>
+    {% if user.role.value == 'admin' %}
+    <a href="/admin/dashboard" class="link">Admin dashboard</a><br>
+    {% endif %}
     <button id="logout">Logout</button>
 </body>
-
-<script>
-    document.getElementById('logout').addEventListener('click', async function() {
-        const response = await fetch('/user/logout', {
-            method: 'POST'
-        });
-
-        if (response.ok) {
-            window.location.href = '/';
-        }
-    });
-</script>
+<script src="../static/logout.js"></script>
 </html>
