@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Form</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <form id="registerForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
+        <br>
+
+        <div class="error" id="errorMessages"></div><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        // submit logic
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Collect form data
+            const formData = {
+                name: document.getElementById('name').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                confirm_password: document.getElementById('confirm_password').value
+            };
+
+            // Send data as JSON
+            const response = await fetch('signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData) // Convert the form data to JSON
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Success:', result);
+                window.location.href = '/user/signin';
+            } else {
+                const error = await response.json();
+                console.error('Error:', error);
+                document.getElementById('errorMessages').textContent = error.detail || 'Registration failed';
+            }
+        });
+
+        // input validation
+        document.getElementById('registerForm').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirm_password = document.getElementById('confirm_password').value;
+            document.getElementById('errorMessages').textContent = '';
+            if (password !== confirm_password) {
+                document.getElementById('errorMessages').textContent = 'Passwords do not match';
+            }
+        });
+    </script>
+</body>
+</html>
