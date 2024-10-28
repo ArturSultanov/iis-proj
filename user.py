@@ -39,7 +39,17 @@ def user_from_cookie(request: Request, db: db_dependency) -> UsersOrm | None:
     if not user:
         return None
     if user.disabled:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is disabled")
+        # Clear the cookie by setting an expired Set-Cookie header
+        headers = {
+            "Set-Cookie": "access_token=; Path=/; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+            "Location": "/"
+        }
+        # Raise an exception to redirect to the login page
+        raise HTTPException(
+            status_code=status.HTTP_303_SEE_OTHER,  # 303 See Other is suitable for redirects after a forbidden access
+            detail="User is disabled",
+            headers=headers
+        )
     return user
 
 @user_router.get("/signup", status_code=status.HTTP_200_OK)
