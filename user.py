@@ -104,7 +104,5 @@ async def logout_user():
 async def profile_page(request: Request, logged_user: UsersOrm = Depends(user_from_cookie)):
     if not logged_user:
         return RedirectResponse(url="/user/signin")
-    # if logged_user.role == Role.admin:
-    #     return RedirectResponse(url="/admin/dashboard")
     return templates.TemplateResponse("profile.html", {"request": request, "user": logged_user})
 
