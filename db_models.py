@@ -53,7 +53,7 @@ class AnimalsOrm(Base):
     name: Mapped[Str256] = mapped_column(nullable=False)
     age: Mapped[int] = mapped_column()
     species: Mapped[Str256] = mapped_column()
-    photo: Mapped[bytes] = mapped_column(LargeBinary(length=2**24-1))
+    photo: Mapped[bytes] = mapped_column(LargeBinary(length=2**24-1), nullable=True)
     description: Mapped[Str2048] = mapped_column()
 
     medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="animal")
