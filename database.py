@@ -17,9 +17,12 @@ session_factory = sessionmaker(bind=engine)
 
 Str256 = sqlAnnotated[str, 256]
 
+Str2048 = sqlAnnotated[str, 2048]
+
 class Base(DeclarativeBase):
     type_annotation_map = {
-        Str256: String(256)
+        Str256: String(256),
+        Str2048: String(2048)
     }
 
 def get_db() -> Session:
