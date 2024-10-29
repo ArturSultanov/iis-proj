@@ -1,4 +1,4 @@
-from typing import Annotated as typingAnnotated
+from typing import Annotated as typingAnnotated, Annotated
 from sqlalchemy.sql.annotation import Annotated as sqlAnnotated
 
 from fastapi import Depends
@@ -15,9 +15,9 @@ engine = create_engine(
 
 session_factory = sessionmaker(bind=engine)
 
-Str256 = sqlAnnotated[str, 256]
+Str256 = Annotated[str, String(256)]
 
-Str2048 = sqlAnnotated[str, 2048]
+Str2048 = Annotated[str, String(2048)]
 
 class Base(DeclarativeBase):
     type_annotation_map = {
