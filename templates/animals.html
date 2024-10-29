@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Animals</h1>
+{% if user != None %}
+{% if user.role.value == 'staff' or user.role.value == 'admin' %}
+<form>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="species">Species:</label>
+    <input type="text" id="species" name="species" required>
+
+    <label for="age">Age:</label>
+    <input type="number" id="age" name="age" required><br>
+
+    <label for="description">Description:</label>
+    <textarea id="description" name="description" required></textarea>
+
+    <label for="photo">Photo:</label>
+    <input type="file" id="photo" name="photo"><br>
+
+    <button type="submit">Add</button>
+</form>
+{% endif %}
+{% endif %}
+{% if animals %}
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Species</th>
+        <th>Age</th>
+        <th>Description</th>
+        <th>Photo</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for animal in animals %}
+    <tr>
+        <td>{{ animal.id }}</td>
+        <td>{{ animal.name }}</td>
+        <td>{{ animal.species }}</td>
+        <td>{{ animal.age }}</td>
+        <td>{{ animal.description }}</td>
+        <td><img src="/animals/{{animal.id}}/photo" alt="{{ animal.name }}" width="100"></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No animals found.</p>
+{% endif %}
+</body>
+{% if user != None %}
+{% if user.role.value == 'staff' or user.role.value == 'admin' %}
+<script>
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+
+        // if no file is selected, remove the photo field
+        if (formData.get('photo').size === 0) {
+            formData.delete('photo');
+        }
+
+        // send with form data content type
+        const response = await fetch('animals/new', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+           window.location.reload();
+        }
+    });
+</script>
+{% endif %}
+{% endif %}
+</html>
