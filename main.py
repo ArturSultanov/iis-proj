@@ -45,4 +45,4 @@ async def index(request: Request, user: UsersOrm = Depends(user_from_cookie)):
     return templates.TemplateResponse("index.html", {"request": request, "user": user}, status_code=HTTP_200_OK)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.WEB_HOST, port=settings.WEB_PORT)
+    uvicorn.run("main:app", host=settings.WEB_HOST, port=settings.WEB_PORT, reload=True)
