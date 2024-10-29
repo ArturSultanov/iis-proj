@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .you {
+            background-color: lemonchiffon;
+        }
+    </style>
 </head>
 <body>
+<div class="error" id="error"></div><br>
 <table>
     <thead>
     <tr>
@@ -17,16 +28,19 @@
     </thead>
     <tbody>
     {% for user in users %}
-        <tr id="user-{{ user.id }}">
+        <tr id="user-{{ user.id }}" {% if user.id == admin.id %} class="you" {% endif %}>
             <td>{{ user.id }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.name }}</td>
             <td>
                 <label>
-                    <select class="role-select" user_id="{{ user.id }}">
+                    <select class="role-select"
+                            user_id="{{ user.id }}"
+                            {% if user.id == admin.id or user.username == 'admin' %}disabled{% endif %}>
                         {% for role in roles %}
                             <option value="{{ role.value }}"
-                                    {% if role == user.role %}selected{% endif %}>{{ role.value }}</option>
+                                    {% if role == user.role %}selected{% endif %}>{{ role.value }}
+                            </option>
                         {% endfor %}
                     </select>
                 </label>
@@ -37,8 +51,15 @@
                            class="active-checkbox"
                            user_id="{{ user.id }}"
                            {% if not user.disabled %}checked{% endif %}
-                           {% if user.id == admin.id %}disabled{% endif %}>
+                           {% if user.id == admin.id or user.username == 'admin' %}disabled{% endif %}>
                 </label>
+            </td>
+            <td>
+                <button class="delete-button"
+                        user_id="{{ user.id }}"
+                        {% if user.id == admin.id or user.username == 'admin'%}disabled{% endif %}>
+                    delete
+                </button>
             </td>
         </tr>
     {% endfor %}
@@ -58,7 +79,8 @@
                 });
 
                 if (!response.ok) {
-                    alert('Failed to update active status');
+                    const error = await response.json();
+                    document.getElementById('error').textContent = error.detail;
                 }
             });
         });
@@ -74,7 +96,26 @@
                 });
 
                 if (!response.ok) {
-                    alert('Failed to update role');
+                    const error = await response.json();
+                    document.getElementById('error').textContent = error.detail;
+                }
+            });
+        });
+
+        const deleteButtons = document.querySelectorAll('.delete-button');
+        deleteButtons.forEach(function (deleteButton) {
+            deleteButton.addEventListener('click', async function () {
+                const userId = deleteButton.getAttribute('user_id');
+
+                const response = await fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    document.getElementById(`user-${userId}`).remove();
+                } else {
+                    const error = await response.json();
+                    document.getElementById('error').textContent = error.detail;
                 }
             });
         });
