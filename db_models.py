@@ -2,6 +2,7 @@ import enum
 from datetime import datetime
 from enum import unique
 from typing import Self
+from uuid import UUID
 
 from sqlalchemy import Integer, ForeignKey, LargeBinary, DateTime, false
 from sqlalchemy.orm import Mapped, Session, foreign, relationship
@@ -34,15 +35,22 @@ class UsersOrm(Base):
     sessions: Mapped[list["SessionsOrm"]] = relationship("SessionsOrm", back_populates="user")
 
     @classmethod
-    def get_user(cls, db: Session, username: str):
+    def get_user(cls, db: Session, username: str) -> Self | None:
         return db.query(UsersOrm).filter(UsersOrm.username == username).first()
+
+    def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
+        session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
+        db.add(session)
+        db.commit()
+        return session.token
 
 class SessionsOrm(Base):
     __tablename__ = 'sessions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    token: Mapped[Str256] = mapped_column(unique=True, nullable=False)
+    token: Mapped[UUID] = mapped_column(unique=True, nullable=False)
+    expiration: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
     user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="sessions")
 
