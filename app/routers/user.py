@@ -1,23 +1,16 @@
-from datetime import datetime, timedelta, timezone
-from uuid import uuid5, uuid4, UUID
+from datetime import timezone
+from uuid import UUID
 
-from fastapi import APIRouter, Request, Depends, HTTPException, Form
-from pydantic import BaseModel, UUID5
+from fastapi import APIRouter, Request, HTTPException, Form
+from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
-from starlette.templating import Jinja2Templates
 
-from database import db_dependency
-from db_models import UsersOrm, Role, SessionsOrm
-from password import hash_password
+from app.database import db_dependency, UsersOrm, SessionsOrm
+from app.password import hash_password
+from app.utils import user_or_none_dependency, session_id_cookie, create_session, templates
 
 user_router = APIRouter(prefix="/user", tags=["user"])
-
-templates = Jinja2Templates(directory="templates")
-
-session_id_cookie = "session_id"
-
-session_duration = timedelta(minutes=2)
 
 class RegisterFormIn(BaseModel):
     name: str = Form(...)
@@ -33,53 +26,14 @@ class LoginFormIn(BaseModel):
     username: str
     password: str
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-def create_session(username: str, db: db_dependency) -> (UUID, datetime):
-    session_id = uuid4()
-    user = UsersOrm.get_user(db, username)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User not found")
-    expiration_date = datetime.now() + session_duration
-    return user.add_session(db, session_id, expiration_date), expiration_date
-
-def user_from_cookie(request: Request, db: db_dependency) -> UsersOrm | None:
-    if session_id_cookie not in request.cookies:
-        return None
-    if not request.cookies.get(session_id_cookie):
-        return None
-
-    session_id = UUID(request.cookies.get(session_id_cookie))
-    session : SessionsOrm | None = db.query(SessionsOrm).filter(SessionsOrm.token == session_id).first()
-    if not session:
-        return None
-    if session.expiration < datetime.now():
-        db.delete(session)
-        db.commit()
-        return None
-    user = session.user
-    if not user:
-        return None
-    if user.disabled:
-        db.delete(session)
-        db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_303_SEE_OTHER,  # 303 See Other is suitable for redirects after a forbidden access
-            detail="User is disabled",
-            headers={"Location": "/user/signin"}
-        )
-    return user
-
 @user_router.get("/signup", status_code=status.HTTP_200_OK)
-async def register_page(request: Request, user: UsersOrm = Depends(user_from_cookie)):
+async def register_page(request: Request, user: user_or_none_dependency):
     if user:
         return RedirectResponse(url="/user/profile")
     return templates.TemplateResponse("signup.html", {"request": request})
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED)
-async def register_user(db: db_dependency, form: RegisterFormIn, user : UsersOrm = Depends(user_from_cookie)):
+async def register_user(db: db_dependency, form: RegisterFormIn, user: user_or_none_dependency):
     if user:
         return {"message": "Already logged in"}
     try:
@@ -98,13 +52,13 @@ async def register_user(db: db_dependency, form: RegisterFormIn, user : UsersOrm
 
 
 @user_router.get("/signin", status_code=status.HTTP_200_OK)
-async def login_page(request: Request, user : UsersOrm = Depends(user_from_cookie)):
+async def login_page(request: Request, user: user_or_none_dependency):
     if user:
         return RedirectResponse(url="/user/profile")
     return templates.TemplateResponse("signin.html", {"request": request})
 
 @user_router.post("/signin", status_code=status.HTTP_200_OK)
-async def login_user(db: db_dependency, form: LoginFormIn, user_before: UsersOrm = Depends(user_from_cookie)):
+async def login_user(db: db_dependency, form: LoginFormIn, user_before: user_or_none_dependency):
     if user_before:
         return {"message": "Already logged in"}
     user = UsersOrm.get_user(db, form.username)
@@ -124,13 +78,33 @@ async def login_user(db: db_dependency, form: LoginFormIn, user_before: UsersOrm
     return response
 
 @user_router.post("/logout", status_code=status.HTTP_200_OK)
-async def logout_user():
+async def logout_user(request: Request, db: db_dependency, logged_user: user_or_none_dependency):
+    if not logged_user:
+        return {"message": "Not logged in"}
+    session_id = UUID(request.cookies.get(session_id_cookie))
+    session = db.query(SessionsOrm).filter(SessionsOrm.token == session_id).first()
+    if session:
+        db.delete(session)
+        db.commit()
     response = JSONResponse(content={"message": "Logged out"})
     response.delete_cookie(key=session_id_cookie)
     return response
 
+@user_router.post("/logout/all", status_code=status.HTTP_200_OK)
+async def logout_all(request: Request, db: db_dependency, logged_user: user_or_none_dependency, except_current: bool = False):
+    if not logged_user:
+        return {"message": "Not logged in"}
+    for session in logged_user.sessions:
+        if except_current and session.token == UUID(request.cookies.get(session_id_cookie)):
+            continue
+        db.delete(session)
+    db.commit()
+    response = JSONResponse(content={"message": "Logged out from all devices"})
+    response.delete_cookie(key=session_id_cookie)
+    return response
+
 @user_router.get("/profile", status_code=status.HTTP_200_OK)
-async def profile_page(request: Request, logged_user: UsersOrm = Depends(user_from_cookie)):
+async def profile_page(request: Request, logged_user: user_or_none_dependency):
     if not logged_user:
         return RedirectResponse(url="/user/signin")
     return templates.TemplateResponse("profile.html", {"request": request, "user": logged_user})

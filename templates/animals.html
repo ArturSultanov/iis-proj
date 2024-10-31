@@ -78,7 +78,7 @@
             body: formData
         });
 
-        if (response.ok) {
+        if (response.ok && response.status === 201) {
            window.location.reload();
         }
     });

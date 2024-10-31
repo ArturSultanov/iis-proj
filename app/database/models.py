@@ -1,13 +1,12 @@
 import enum
 from datetime import datetime
-from enum import unique
 from typing import Self
 from uuid import UUID
 
-from sqlalchemy import Integer, ForeignKey, LargeBinary, DateTime, false
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy import ForeignKey, LargeBinary, DateTime
+from sqlalchemy.orm import Mapped, Session, relationship
 from sqlalchemy.testing.schema import mapped_column
-from database import Base, Str256, Str2048
+from .database import Base, Str256, Str2048
 
 
 class Role(enum.Enum):
@@ -33,6 +32,8 @@ class UsersOrm(Base):
     disabled: Mapped[bool] = mapped_column(default=False)
 
     sessions: Mapped[list["SessionsOrm"]] = relationship("SessionsOrm", back_populates="user")
+    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = relationship("AdoptionRequestsOrm", back_populates="user")
+    volunteer_application: Mapped["VolunteerApplicationsOrm"] = relationship("VolunteerApplicationsOrm", back_populates="user")
 
     @classmethod
     def get_user(cls, db: Session, username: str) -> Self | None:
@@ -44,6 +45,17 @@ class UsersOrm(Base):
         db.commit()
         return session.token
 
+class VolunteerApplicationsOrm(Base):
+    __tablename__ = 'volunteer_applications'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    status: Mapped[bool] = mapped_column(default=False)
+    message: Mapped[Str2048] = mapped_column(nullable=True)
+
+    user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="volunteer_application")
+
 class SessionsOrm(Base):
     __tablename__ = 'sessions'
 
@@ -54,6 +66,37 @@ class SessionsOrm(Base):
 
     user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="sessions")
 
+class AdoptionStatus(enum.Enum):
+    pending = 'pending'
+    accepted = 'accepted'
+    rejected = 'rejected'
+
+    @classmethod
+    def get_adoption_statuses(cls) -> list[Self]:
+        return [status for status in cls]
+
+class AdoptionRequestsOrm(Base):
+    __tablename__ = 'adoption_requests'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    status: Mapped[AdoptionStatus] = mapped_column(default=AdoptionStatus.pending)
+
+    user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="adoption_requests")
+    animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="adoption_requests")
+
+class AnimalStatus(enum.Enum):
+    available = 'available'
+    quarantine = 'quarantine'
+    adopted = 'adopted'
+    deceased = 'deceased'
+
+    @classmethod
+    def get_animal_statuses(cls) -> list[Self]:
+        return [status for status in cls]
+
 class AnimalsOrm(Base):
     __tablename__ = 'animals'
 
@@ -63,9 +106,11 @@ class AnimalsOrm(Base):
     species: Mapped[Str256] = mapped_column()
     photo: Mapped[bytes] = mapped_column(LargeBinary(length=2**24-1), nullable=True)
     description: Mapped[Str2048] = mapped_column()
+    status: Mapped[AnimalStatus] = mapped_column(default=AnimalStatus.available)
 
     medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="animal")
     scheduled_walks:  Mapped[list["WalksOrm"]] = relationship("WalksOrm", back_populates="animal")
+    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = relationship("AdoptionRequestsOrm", back_populates="animal")
 
 class WalksOrm(Base):
     __tablename__ = 'walks'

@@ -1,10 +1,9 @@
 from typing import Annotated as typingAnnotated, Annotated
-from sqlalchemy.sql.annotation import Annotated as sqlAnnotated
 
 from fastapi import Depends
-from sqlalchemy import create_engine, text, String
+from sqlalchemy import create_engine, String
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
-from config import settings
+from app.config import settings
 
 engine = create_engine(
     url=settings.database_url,
@@ -25,6 +24,7 @@ class Base(DeclarativeBase):
         Str2048: String(2048)
     }
 
+# Generator to get a session from the session factory
 def get_db() -> Session:
     db = session_factory()
     try:
@@ -33,8 +33,3 @@ def get_db() -> Session:
         db.close()
 
 db_dependency = typingAnnotated[Session, Depends(get_db)]
-
-
-# with engine.connect() as conn:
-#     res = conn.execute(text("SELECT VERSION()"))
-#     print(f"{res.first()=}")

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>Animal Profile</h1>
+    <div>
+        <p>Name: <span id="name">{{ animal.name }}</span></p>
+        <p><img src="/animals/{{animal.id}}/photo" alt="{{ animal.name }}" width="100"></p>
+        <p>Species: <span id="species">{{ animal.species }}</span></p>
+        <p>Breed: <span id="breed">{{ animal.breed }}</span></p>
+        <p>Age: <span id="age">{{ animal.age }}</span></p>
+    </div>
+    <div>
+        <p>Description: <span id="description">{{ animal.description }}</span></p>
+        <button id="edit-description">Edit Description</button>
+    </div>
+</body>
+
+</html>
