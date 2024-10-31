@@ -7,7 +7,7 @@ from app.config import settings
 
 engine = create_engine(
     url=settings.database_url,
-    echo=True,
+    echo=settings.SQL_ALCHEMY_DEBUG,
     pool_size=10,
     max_overflow=10
 )

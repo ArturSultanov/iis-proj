@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     WEB_PORT: int
     APP_STATIC_PATH: str
     APP_TEMPLATES_PATH: str
+    SQL_ALCHEMY_DEBUG: bool
 
     @property
     def database_url(self) -> str:
