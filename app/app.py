@@ -23,7 +23,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(HTTPSRedirectMiddleware, https_strict=True,
+                    allow_origins = ["*"],
+                    allow_credentials = True,
+                    allow_methods = ["*"],
+                    allow_headers = ["*"],
+)
 app.include_router(user_router)
 app.include_router(admin_router)
 app.include_router(staff_router)
