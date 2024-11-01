@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK
 
@@ -22,6 +23,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(HTTPSRedirectMiddleware)
 app.include_router(user_router)
 app.include_router(admin_router)
 app.include_router(staff_router)
