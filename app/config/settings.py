@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     APP_STATIC_PATH: str
     APP_TEMPLATES_PATH: str
     SQL_ALCHEMY_DEBUG: bool
+    SSL_CERT_ENABLED: bool
+    SSL_CERT_PATH: str
+    SSL_KEY_PATH: str
 
     @property
     def database_url(self) -> str:
