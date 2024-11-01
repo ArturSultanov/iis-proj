@@ -27,7 +27,7 @@ class UsersOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[Str256] = mapped_column()
     username: Mapped[Str256] = mapped_column(unique=True)
-    password: Mapped[Str256]
+    password: Mapped[bytes] = mapped_column(LargeBinary(length=2**10), nullable=False)
     role: Mapped[Role] = mapped_column(default=Role.registered)
     disabled: Mapped[bool] = mapped_column(default=False)
 
@@ -49,7 +49,7 @@ class VolunteerApplicationsOrm(Base):
     __tablename__ = 'volunteer_applications'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[bool] = mapped_column(default=False)
     message: Mapped[Str2048] = mapped_column(nullable=True)
@@ -60,7 +60,7 @@ class SessionsOrm(Base):
     __tablename__ = 'sessions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
     token: Mapped[UUID] = mapped_column(unique=True, nullable=False)
     expiration: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
@@ -79,8 +79,8 @@ class AdoptionRequestsOrm(Base):
     __tablename__ = 'adoption_requests'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False) # todo cascade delete
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[AdoptionStatus] = mapped_column(default=AdoptionStatus.pending)
 
@@ -116,8 +116,8 @@ class WalksOrm(Base):
     __tablename__ = 'walks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False) # todo cascade delete
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)
     location: Mapped[Str256] = mapped_column()
@@ -128,7 +128,7 @@ class MedicalHistoriesOrm(Base):
     __tablename__ = 'medical_histories'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False) # todo cascade delete
     start_date:Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
@@ -141,7 +141,7 @@ class TreatmentsOrm(Base):
     __tablename__ = 'treatments'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'), nullable=False)
+    medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'), nullable=False) # todo cascade delete
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
@@ -151,7 +151,7 @@ class VaccinationsOrm(Base):
     __tablename__ = 'vaccinations'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'), nullable=False)
+    medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'), nullable=False) # todo cascade delete
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 

@@ -1,4 +1,4 @@
-from typing import Annotated as typingAnnotated, Annotated
+from typing import Annotated as typingAnnotated
 
 from fastapi import Depends
 from sqlalchemy import create_engine, String
@@ -14,9 +14,9 @@ engine = create_engine(
 
 session_factory = sessionmaker(bind=engine)
 
-Str256 = Annotated[str, String(256)]
+Str256 = typingAnnotated[str, String(256)]
 
-Str2048 = Annotated[str, String(2048)]
+Str2048 = typingAnnotated[str, String(2048)]
 
 class Base(DeclarativeBase):
     type_annotation_map = {
@@ -25,6 +25,7 @@ class Base(DeclarativeBase):
     }
 
 # Generator to get a session from the session factory
+# todo
 def get_db() -> Session:
     db = session_factory()
     try:

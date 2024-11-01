@@ -11,7 +11,18 @@ from typing import Annotated as typingAnnotated
 
 session_duration = timedelta(hours=1)
 
-session_id_cookie = "session_id"
+session_id_cookie = "SESSION"
+
+class NoneSession(SessionsOrm):
+
+    @property
+    def user(self):
+        return None
+
+    def __bool__(self):
+        return False
+
+none_session = NoneSession()
 
 def create_session(username: str, db: db_dependency) -> (UUID, datetime):
     session_id = uuid4()
@@ -21,23 +32,23 @@ def create_session(username: str, db: db_dependency) -> (UUID, datetime):
     expiration_date = datetime.now() + session_duration
     return user.add_session(db, session_id, expiration_date), expiration_date
 
-def user_from_cookie(request: Request, db: db_dependency) -> UsersOrm | None:
+def get_session(request: Request, db: db_dependency) -> SessionsOrm:
     if session_id_cookie not in request.cookies:
-        return None
+        return none_session
     if not request.cookies.get(session_id_cookie):
-        return None
+        return none_session
 
     session_id = UUID(request.cookies.get(session_id_cookie))
     session : SessionsOrm | None = db.query(SessionsOrm).filter(SessionsOrm.token == session_id).first()
     if not session:
-        return None
+        return none_session
     if session.expiration < datetime.now():
         db.delete(session)
         db.commit()
-        return None
+        return none_session
     user = session.user
     if not user:
-        return None
+        return none_session
     if user.disabled:
         db.delete(session)
         db.commit()
@@ -46,31 +57,48 @@ def user_from_cookie(request: Request, db: db_dependency) -> UsersOrm | None:
             detail="User is disabled",
             headers={"Location": "/user/signin"}
         )
-    return user
+    return session
 
-def get_user(logged_user: UsersOrm = Depends(user_from_cookie)) -> UsersOrm:
-    if not logged_user:
+session_dependency = typingAnnotated[SessionsOrm | None, Depends(get_session)]
+
+def get_user(session: session_dependency) -> UsersOrm:
+    if not session:
         raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="You need to login", headers={"Location": "/user/signin"})
-    return logged_user
+    return session.user
 
-def get_admin(logged_user: UsersOrm = Depends(user_from_cookie)) -> UsersOrm:
-    if not logged_user:
+def get_admin(session: session_dependency) -> UsersOrm:
+    if not session:
         raise HTTPException(status_code=HTTP_401_UNAUTHORIZED)
-    if logged_user.role != Role.admin:
+    if session.user.role != Role.admin:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN)
-    return logged_user
+    return session.user
 
-def get_staff(logged_user: UsersOrm = Depends(user_from_cookie)) -> UsersOrm:
-    if not logged_user:
+def get_staff(session: session_dependency) -> UsersOrm:
+    if not session:
         raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="You need to login", headers={"Location": "/user/signin"})
-    if logged_user.role != Role.staff and logged_user.role != Role.admin:
+    if session.user.role != Role.staff and session.user.role != Role.admin:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN)
-    return logged_user
+    return session.user
 
-user_or_none_dependency = typingAnnotated[UsersOrm | None, Depends(user_from_cookie)]
+def get_vet(session: session_dependency) -> UsersOrm:
+    if not session:
+        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="You need to login", headers={"Location": "/user/signin"})
+    if session.user.role != Role.vet and session.user.role != Role.admin:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN)
+    return session.user
+
+def get_volunteer(session: session_dependency) -> UsersOrm:
+    if not session:
+        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="You need to login", headers={"Location": "/user/signin"})
+    if session.user.role != Role.volunteer and session.user.role != Role.admin:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN)
+    return session.user
+
 user_dependency = typingAnnotated[UsersOrm, Depends(get_user)]
 admin_dependency = typingAnnotated[UsersOrm, Depends(get_admin)]
 staff_dependency = typingAnnotated[UsersOrm, Depends(get_staff)]
+vet_dependency = typingAnnotated[UsersOrm, Depends(get_vet)]
+volunteer_dependency = typingAnnotated[UsersOrm, Depends(get_volunteer)]
 
 templates = Jinja2Templates(directory=settings.APP_TEMPLATES_PATH)
 

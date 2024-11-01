@@ -11,7 +11,7 @@ from app.database import get_db, db_dependency, UsersOrm, Role, AnimalsOrm
 from app.database import Base as dbBase
 from app.password import hash_password
 from app.routers import *
-from app.utils import user_or_none_dependency, templates
+from app.utils import session_dependency, templates
 
 app = FastAPI()
 
@@ -38,17 +38,17 @@ if not UsersOrm.get_user(start_db, "admin"):
 
 
 @app.get("/")
-async def index(request: Request, user: user_or_none_dependency):
-    return templates.TemplateResponse("index.html", {"request": request, "user": user}, status_code=HTTP_200_OK)
+async def index(request: Request, session: session_dependency):
+    return templates.TemplateResponse("index.html", {"request": request, "user": session.user}, status_code=HTTP_200_OK)
 
 @app.get("/animals")
-async def animals(request: Request, db: db_dependency, user: user_or_none_dependency):
+async def animals(request: Request, db: db_dependency, session: session_dependency):
     animals_list = db.query(AnimalsOrm).all()
-    if not user:
+    if not session:
         return templates.TemplateResponse("animals.html", {"request": request, "user": None, "animals": animals_list}, status_code=HTTP_200_OK)
-    if user.role == Role.staff or user.role == Role.admin:
+    if session.user.role == Role.staff or session.user.role == Role.admin:
         return RedirectResponse(url="/staff/animals")
-    return templates.TemplateResponse("animals.html", {"request": request, "user": user, "animals": animals_list}, status_code=HTTP_200_OK)
+    return templates.TemplateResponse("animals.html", {"request": request, "user": session.user, "animals": animals_list}, status_code=HTTP_200_OK)
 
 @app.get("/animals/{animal_id}/photo")
 async def animal_photo(animal_id: int, db: db_dependency):
