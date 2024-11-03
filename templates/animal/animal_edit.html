@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Animal Profile</h1>
+<div>
+    <div id="name_div">
+        <p>Name: <span id="name">{{ animal.name }}</span></p>
+        <button id="edit-name">Edit Name</button>
+    </div>
+    <div id="age_div">
+        <p>Age: <span id="age">{{ animal.age }}</span></p>
+        <button id="edit-age">Edit Age</button>
+    </div>
+    <div id="photo_div">
+        <p><img src="/animals/{{animal.id}}/photo" alt="{{ animal.name }}" width="100"></p>
+    </div>
+    <div id="photo_upload_div">
+        <form id="photo_upload_form" enctype="multipart/form-data">
+            <input type="file" name="photo" id="photo">
+            <button type="submit" id="photo_submit">Delete Photo</button>
+        </form>
+    </div>
+    <div id="species_div">
+        <p>Species: <span id="species">{{ animal.species }}</span></p>
+        <button id="edit-species">Edit Species</button>
+    </div>
+</div>
+<div>
+    <label for="description">Description: </label><br>
+    <div id="description" style="white-space: pre-wrap" contenteditable="true">{{ animal.description }}</div>
+    <button id="edit-description">Update Description</button>
+</div>
+</body>
+<script>
+    document.getElementById('edit-name').addEventListener('click', function() {
+        var name = prompt('Enter new name');
+        // put with new_name as query parameter
+        if (name) {
+            fetch('/staff/animals/{{ animal.id }}/name?new_name=' + name, {
+                method: 'PUT'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('name').textContent = data.name;
+            });
+        }
+    });
+
+    document.getElementById('photo_upload_form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        let formData = new FormData();
+        let photo = document.getElementById('photo').files[0];
+        // if photo is undefined send empty put request to clear photo
+        let response;
+        if (photo) {
+            formData.append('photo', photo);
+            response = fetch('/staff/animals/{{ animal.id }}/photo', {
+                method: 'PUT',
+                body: formData
+            });
+        } else {
+            response = fetch('/staff/animals/{{ animal.id }}/photo', {
+                method: 'DELETE'
+            });
+        }
+
+        if (response) {
+            response
+            .then(response => response.json())
+            .then(data => {
+                // fetch new photo
+                fetch('/animals/{{ animal.id }}/photo', {
+                    method: 'GET'
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    document.querySelector('img').src = URL.createObjectURL(blob);
+                    // reset file input
+                    document.getElementById('photo').value = '';
+                    document.getElementById('photo_submit').textContent = 'Delete Photo';
+                });
+            });
+        }
+    });
+
+    // on file input change
+    document.getElementById('photo').addEventListener('change', function() {
+        let photo = document.getElementById('photo').files[0];
+        if (photo) {
+            document.getElementById('photo_submit').textContent = 'Upload Photo';
+        } else {
+            document.getElementById('photo_submit').textContent = 'Delete Photo';
+        }
+    });
+
+    document.getElementById('edit-age').addEventListener('click', function() {
+        var age = prompt('Enter new age');
+        if (age) {
+            fetch('/staff/animals/{{ animal.id }}/age?new_age=' + age, {
+                method: 'PUT'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('age').textContent = data.age;
+            });
+        }
+    });
+
+    document.getElementById('edit-description').addEventListener('click', function() {
+        var description = document.getElementById('description').textContent;
+        console.log(description);
+        // encode description with newlines
+        var query_encoded = encodeURIComponent(description).replace(/%0A/g, '%0D%0A');
+        if (description) {
+            fetch('/staff/animals/{{ animal.id }}/description?new_description=' + query_encoded, {
+                method: 'PUT'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('description').textContent = data.description;
+            });
+        }
+    });
+
+    document.getElementById('edit-species').addEventListener('click', function() {
+        var species = prompt('Enter new species');
+        if (species) {
+            fetch('/staff/animals/{{ animal.id }}/species?new_species=' + species, {
+                method: 'PUT'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('species').textContent = data.species;
+            });
+        }
+    });
+
+    const editableDiv = document.getElementById('description');
+
+        editableDiv.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default behavior (new block)
+                document.execCommand('insertLineBreak'); // Insert a line break
+            }
+        });
+</script>
+</html>

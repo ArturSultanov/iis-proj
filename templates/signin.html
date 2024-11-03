@@ -51,6 +51,17 @@
                 document.getElementById('error').textContent = error.detail;
             }
         });
+
+        // get username and password from local storage
+        const username = localStorage.getItem('username');
+        const password = localStorage.getItem('password');
+        if (username) {
+            document.getElementById('username').value = username;
+        }
+        if (password) {
+            document.getElementById('password').value = password;
+        }
+        localStorage.clear();
     </script>
 </body>
 </html>

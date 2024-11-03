@@ -59,12 +59,11 @@
             });
 
             if (response.ok) {
-                const result = await response.json();
-                console.log('Success:', result);
                 window.location.href = '/user/signin';
+                localStorage.setItem('username', formData.username);
+                localStorage.setItem('password', formData.password);
             } else {
                 const error = await response.json();
-                console.error('Error:', error);
                 document.getElementById('errorMessages').textContent = error.detail || 'Registration failed';
             }
         });

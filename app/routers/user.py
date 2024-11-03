@@ -1,16 +1,17 @@
 from datetime import timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Request, HTTPException, Form
+from fastapi import APIRouter, Request, HTTPException, Form, Depends
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 
-from app.database import db_dependency, UsersOrm, SessionsOrm
+from app.database import db_dependency, UsersOrm
 from app.password import hash_password, verify_password
 from app.utils import session_dependency, session_id_cookie, create_session, templates
 
-user_router = APIRouter(prefix="/user", tags=["user"])
+user_router = APIRouter(prefix="/user",
+                        tags=["user"])
 
 class RegisterFormIn(BaseModel):
     name: str = Form(...)

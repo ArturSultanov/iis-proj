@@ -1,4 +1,4 @@
-from typing import Annotated as typingAnnotated
+from typing import Annotated as typingAnnotated, Iterable, Generator
 
 from fastapi import Depends
 from sqlalchemy import create_engine, String
@@ -24,9 +24,10 @@ class Base(DeclarativeBase):
         Str2048: String(2048)
     }
 
-# Generator to get a session from the session factory
-# todo
-def get_db() -> Session:
+def create_all_tables():
+    Base.metadata.create_all(engine)
+
+def get_db() -> Generator[Session, None, None]:
     db = session_factory()
     try:
         yield db
