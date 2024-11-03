@@ -43,7 +43,6 @@ async def user_state(user_id: int, active: bool, db: db_dependency, admin: admin
     validate_user_operation(user, admin)
     user.disabled = active
     db.commit()
-    return RedirectResponse(url="/admin/users")
 
 @admin_router.patch("/users/{user_id}/role", status_code=HTTP_202_ACCEPTED)
 async def user_role(user_id: int, role: Role, db: db_dependency, admin: admin_dependency):
@@ -51,7 +50,6 @@ async def user_role(user_id: int, role: Role, db: db_dependency, admin: admin_de
     validate_user_operation(user, admin)
     user.role = role
     db.commit()
-    return RedirectResponse(url="/admin/users")
 
 @admin_router.delete("/users/{user_id}", status_code=HTTP_202_ACCEPTED)
 async def delete_user(user_id: int, db: db_dependency, admin: admin_dependency):
@@ -59,4 +57,3 @@ async def delete_user(user_id: int, db: db_dependency, admin: admin_dependency):
     validate_user_operation(user, admin)
     db.delete(user)
     db.commit()
-    return RedirectResponse(url="/admin/users", status_code=HTTP_202_ACCEPTED)
