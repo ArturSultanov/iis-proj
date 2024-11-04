@@ -3,8 +3,8 @@ from starlette.responses import RedirectResponse
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_200_OK, \
     HTTP_404_NOT_FOUND, HTTP_202_ACCEPTED
 
-from app.database import db_dependency, UsersOrm, Role
-from app.utils import admin_dependency, templates, get_admin
+from app.database import db_dependency, UsersOrm, Role, SessionsOrm
+from app.utils import admin_dependency, templates, get_admin, session_dependency
 
 admin_router = APIRouter(prefix="/admin",
                          tags=["admin"],
@@ -57,3 +57,14 @@ async def delete_user(user_id: int, db: db_dependency, admin: admin_dependency):
     validate_user_operation(user, admin)
     db.delete(user)
     db.commit()
+
+@admin_router.delete("/sessions", status_code=HTTP_202_ACCEPTED)
+async def delete_sessions(db: db_dependency, cur_session: session_dependency):
+    sessions = db.query(SessionsOrm).all()
+    sessions_count = len(sessions)
+    for session in sessions:
+        if session.id == cur_session.id:
+            continue
+        db.delete(session)
+    db.commit()
+    return {"message": f"Deleted {sessions_count - 1} sessions"}

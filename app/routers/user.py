@@ -1,5 +1,4 @@
 from datetime import timezone
-from uuid import UUID
 
 from fastapi import APIRouter, Request, HTTPException, Form, Depends
 from pydantic import BaseModel
@@ -75,11 +74,16 @@ async def login_user(db: db_dependency, form: LoginFormIn, session: session_depe
     session_id, expiration = create_session(form.username, db)
     response = JSONResponse(content={session_id_cookie: session_id.hex})
     utc_expiration = expiration.astimezone(timezone.utc)
-    response.set_cookie(key=session_id_cookie, value=session_id.hex, expires=utc_expiration)
+    response.set_cookie(key=session_id_cookie,
+                        value=session_id.hex,
+                        expires=utc_expiration,
+                        httponly=True,
+                        secure=True,
+                        samesite="strict")
     return response
 
 @user_router.delete("/logout", status_code=status.HTTP_200_OK)
-async def logout_user(request: Request, db: db_dependency, session: session_dependency):
+async def logout_user(db: db_dependency, session: session_dependency):
     if not session:
         return {"message": "Not logged in"}
     db.delete(session)
@@ -89,16 +93,19 @@ async def logout_user(request: Request, db: db_dependency, session: session_depe
     return response
 
 @user_router.delete("/logout/all", status_code=status.HTTP_200_OK)
-async def logout_all(request: Request, db: db_dependency, session: session_dependency, except_current: bool = False):
+async def logout_all(db: db_dependency, session: session_dependency, keep_current: bool = False):
+    if keep_current:
+        print("Keeping current session")
     if not session:
         return {"message": "Not logged in"}
-    for other_sessions in session.user.sessions:
-        if except_current and session.token == other_sessions.token:
+    for other_session in session.user.sessions:
+        if keep_current and session.id == other_session.id:
             continue
-        db.delete(session)
+        db.delete(other_session)
     db.commit()
-    response = JSONResponse(content={"message": "Logged out from all devices"})
-    response.delete_cookie(key=session_id_cookie)
+    response = JSONResponse(content={"message": f"Logged out from all devices {"except current" if keep_current else ""}"})
+    if not keep_current:
+        response.delete_cookie(key=session_id_cookie)
     return response
 
 @user_router.get("/profile", status_code=status.HTTP_200_OK)

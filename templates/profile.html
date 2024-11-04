@@ -11,7 +11,10 @@
     {% if user.role.value == 'admin' %}
     <a href="/admin/dashboard" class="link">Admin dashboard</a><br>
     {% endif %}
-    <button id="logout">Logout</button>
+    <button id="logout">Logout</button><br>
+    <button id="logout_all">Logout All</button>
+    <label for="keep_this">Keep this session: </label>
+    <input type="checkbox" id="keep_this" checked>
 </body>
 <script src="../static/logout.js"></script>
 </html>

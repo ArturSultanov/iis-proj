@@ -12,7 +12,23 @@
 <a href="/admin/animals" class="link">Animals</a>
 <a href="/admin/adoptions" class="link">Adoptions</a>
 <br>
+<button id="terminate_all_sessions">terminate all sessions</button>
+<br>
 <button id="logout">Logout</button>
 </body>
 <script src="../../static/logout.js"></script>
+<script>
+    document.getElementById('terminate_all_sessions').addEventListener('click', function () {
+        fetch('/admin/sessions', {
+            method: 'DELETE'
+        }).then(async response => {
+            if (response.ok) {
+                const data = await response.json();
+                alert(data.message);
+            } else {
+                alert('Error terminating sessions');
+            }
+        });
+    });
+</script>
 </html>
