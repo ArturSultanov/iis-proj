@@ -48,48 +48,47 @@ async def staff_animals_page(request: Request, db: db_dependency, staff: staff_d
                                       })
 
 @staff_router.post("/animals/new", status_code=HTTP_201_CREATED)
-async def add_animal(db: db_dependency,
-                     animal: Annotated[AnimalForm, Form()],):
+async def add_animal(db: db_dependency, animal: Annotated[AnimalForm, Form()]):
     new_animal = AnimalsOrm(**animal.get_dict)
     db.add(new_animal)
     db.commit()
     return {"message": "Animal added successfully"}
 
-@staff_router.delete("/animals/{animal_id}/delete", status_code=HTTP_200_OK)
+@staff_router.delete("/animals/{animal_id}", status_code=HTTP_200_OK)
 async def delete_animal(db: db_dependency, animal: animal_dependency):
     db.delete(animal)
     db.commit()
     return {"message": "Animal deleted successfully"}
 
-@staff_router.get("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
 async def edit_animal_page(request: Request, animal: animal_dependency):
     return templates.TemplateResponse("animal/animal_edit.html", {"request": request, "animal": animal})
 
-@staff_router.put("/animals/{animal_id}/name", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/name", status_code=HTTP_200_OK)
 async def edit_animal_name(db: db_dependency, animal: animal_dependency, new_name: str = Query(...)):
     animal.name = new_name
     db.commit()
     return {"message": "Name updated successfully", "name": new_name}
 
-@staff_router.put("/animals/{animal_id}/species", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/species", status_code=HTTP_200_OK)
 async def edit_animal_species(db: db_dependency, animal: animal_dependency, new_species: str = Query(...)):
     animal.species = new_species
     db.commit()
     return {"message": "Species updated successfully", "species": new_species}
 
-@staff_router.put("/animals/{animal_id}/age", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/age", status_code=HTTP_200_OK)
 async def edit_animal_age(db: db_dependency, animal: animal_dependency, new_age: int = Query(...)):
     animal.age = new_age
     db.commit()
     return {"message": "Age updated successfully", "age": new_age}
 
-@staff_router.put("/animals/{animal_id}/description", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/description", status_code=HTTP_200_OK)
 async def edit_animal_description(db: db_dependency, animal: animal_dependency, new_description: str = Query(...)):
     animal.description = new_description
     db.commit()
     return {"message": "Description updated successfully", "description": new_description}
 
-@staff_router.put("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
+@staff_router.patch("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def edit_animal_photo(db: db_dependency, animal: animal_dependency, photo: UploadFile = Form(None)):
     animal.photo = photo.file.read() if photo else None
     db.commit()

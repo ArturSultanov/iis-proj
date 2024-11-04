@@ -78,7 +78,7 @@ async def login_user(db: db_dependency, form: LoginFormIn, session: session_depe
     response.set_cookie(key=session_id_cookie, value=session_id.hex, expires=utc_expiration)
     return response
 
-@user_router.post("/logout", status_code=status.HTTP_200_OK)
+@user_router.delete("/logout", status_code=status.HTTP_200_OK)
 async def logout_user(request: Request, db: db_dependency, session: session_dependency):
     if not session:
         return {"message": "Not logged in"}
@@ -88,7 +88,7 @@ async def logout_user(request: Request, db: db_dependency, session: session_depe
     response.delete_cookie(key=session_id_cookie)
     return response
 
-@user_router.post("/logout/all", status_code=status.HTTP_200_OK)
+@user_router.delete("/logout/all", status_code=status.HTTP_200_OK)
 async def logout_all(request: Request, db: db_dependency, session: session_dependency, except_current: bool = False):
     if not session:
         return {"message": "Not logged in"}

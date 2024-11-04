@@ -84,28 +84,28 @@ def get_user(session: session_dependency) -> UsersOrm:
 def get_admin(session: session_dependency) -> UsersOrm:
     if not session:
         raise need_login_exception
-    if session.user.role != Role.admin:
+    if not session.user.is_admin:
         raise forbidden_exception
     return session.user
 
 def get_staff(session: session_dependency) -> UsersOrm:
     if not session:
         raise need_login_exception
-    if session.user.role != Role.staff and session.user.role != Role.admin:
+    if session.user.is_staff:
         raise forbidden_exception
     return session.user
 
 def get_vet(session: session_dependency) -> UsersOrm:
     if not session:
         raise need_login_exception
-    if session.user.role != Role.vet and session.user.role != Role.admin:
+    if session.user.is_vet:
         raise forbidden_exception
     return session.user
 
 def get_volunteer(session: session_dependency) -> UsersOrm:
     if not session:
         raise need_login_exception
-    if session.user.role != Role.volunteer and session.user.role != Role.admin:
+    if session.user.is_volunteer:
         raise forbidden_exception
     return session.user
 

@@ -59,7 +59,7 @@
         if (photo) {
             formData.append('photo', photo);
             response = fetch('/staff/animals/{{ animal.id }}/photo', {
-                method: 'PUT',
+                method: 'PATCH',
                 body: formData
             });
         } else {
@@ -101,7 +101,7 @@
         var age = prompt('Enter new age');
         if (age) {
             fetch('/staff/animals/{{ animal.id }}/age?new_age=' + age, {
-                method: 'PUT'
+                method: 'PATCH'
             })
             .then(response => response.json())
             .then(data => {
@@ -117,7 +117,7 @@
         var query_encoded = encodeURIComponent(description).replace(/%0A/g, '%0D%0A');
         if (description) {
             fetch('/staff/animals/{{ animal.id }}/description?new_description=' + query_encoded, {
-                method: 'PUT'
+                method: 'PATCH'
             })
             .then(response => response.json())
             .then(data => {
@@ -130,7 +130,7 @@
         var species = prompt('Enter new species');
         if (species) {
             fetch('/staff/animals/{{ animal.id }}/species?new_species=' + species, {
-                method: 'PUT'
+                method: 'PATCH'
             })
             .then(response => response.json())
             .then(data => {

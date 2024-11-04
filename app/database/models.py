@@ -39,6 +39,22 @@ class UsersOrm(Base):
     def get_user(cls, db: Session, username: str) -> Self | None:
         return db.query(UsersOrm).filter(UsersOrm.username == username).first()
 
+    @property
+    def is_admin(self) -> bool:
+        return self.role == Role.admin
+
+    @property
+    def is_staff(self) -> bool:
+        return self.role == Role.staff or self.is_admin
+
+    @property
+    def is_vet(self) -> bool:
+        return self.role == Role.vet or self.is_admin
+
+    @property
+    def is_volunteer(self) -> bool:
+        return self.role == Role.volunteer or self.is_admin
+
     def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
         session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
         db.add(session)

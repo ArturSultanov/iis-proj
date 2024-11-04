@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK
 
@@ -35,20 +34,21 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["*"]
     )
 
 @app.get("/")
-async def index(request: Request, session: session_dependency):
+async def index_page(request: Request, session: session_dependency):
     return templates.TemplateResponse("index.html", {"request": request, "user": session.user}, status_code=HTTP_200_OK)
 
 @app.get("/animals")
-async def animals(request: Request, db: db_dependency, session: session_dependency):
+async def animals_page(request: Request, db: db_dependency, session: session_dependency):
     animals_list = db.query(AnimalsOrm).all()
     if not session:
         return templates.TemplateResponse("animals.html", {"request": request, "user": None, "animals": animals_list}, status_code=HTTP_200_OK)
@@ -64,3 +64,8 @@ async def animal_photo(animal_id: int, db: db_dependency):
     if not animal or not animal.photo:
         return HTMLResponse(content=placeholder_photo, status_code=200, media_type="image/jpeg")
     return HTMLResponse(content=animal.photo, status_code=200, media_type="image/jpeg")
+
+@app.get("/animals/{animal_id}")
+async def animal_profile(request: Request, animal_id: int, db: db_dependency, session: session_dependency):
+    # animal profile
+    pass
