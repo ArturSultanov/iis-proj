@@ -81,35 +81,28 @@ def get_user(session: session_dependency) -> UsersOrm:
         raise need_login_exception
     return session.user
 
-def get_admin(session: session_dependency) -> UsersOrm:
-    if not session:
-        raise need_login_exception
-    if not session.user.is_admin:
-        raise forbidden_exception
-    return session.user
-
-def get_staff(session: session_dependency) -> UsersOrm:
-    if not session:
-        raise need_login_exception
-    if session.user.is_staff:
-        raise forbidden_exception
-    return session.user
-
-def get_vet(session: session_dependency) -> UsersOrm:
-    if not session:
-        raise need_login_exception
-    if session.user.is_vet:
-        raise forbidden_exception
-    return session.user
-
-def get_volunteer(session: session_dependency) -> UsersOrm:
-    if not session:
-        raise need_login_exception
-    if session.user.is_volunteer:
-        raise forbidden_exception
-    return session.user
-
 user_dependency = typingAnnotated[UsersOrm, Depends(get_user)]
+
+def get_admin(user: user_dependency) -> UsersOrm:
+    if not user.is_admin:
+        raise forbidden_exception
+    return user
+
+def get_staff(user: user_dependency) -> UsersOrm:
+    if not user.is_staff:
+        raise forbidden_exception
+    return user
+
+def get_vet(user: user_dependency) -> UsersOrm:
+    if not user.is_vet:
+        raise forbidden_exception
+    return user
+
+def get_volunteer(user: user_dependency) -> UsersOrm:
+    if not user.is_volunteer:
+        raise forbidden_exception
+    return user
+
 admin_dependency = typingAnnotated[UsersOrm, Depends(get_admin)]
 staff_dependency = typingAnnotated[UsersOrm, Depends(get_staff)]
 vet_dependency = typingAnnotated[UsersOrm, Depends(get_vet)]
