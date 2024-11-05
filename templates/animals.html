@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="../static/css/main.css">
+    <link rel="stylesheet" href="../static/css/table.css">
+    <link rel="stylesheet" href="../static/css/horizontal_forms.css">
 </head>
 <body>
 <h1>Animals</h1>
 {% if user != None %}
-{% if user.role.value == 'staff' or user.role.value == 'admin' %}
-<form>
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
+{% if user.is_staff and page == 1 %}
+<form class="horizontal-form">
+    <div class="horizontal-form-top">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
 
-    <label for="species">Species:</label>
-    <input type="text" id="species" name="species" required>
+        <label for="species">Species:</label>
+        <input type="text" id="species" name="species" required>
 
-    <label for="age">Age:</label>
-    <input type="number" id="age" name="age" required><br>
-
-    <label for="description">Description:</label>
-    <textarea id="description" name="description" required></textarea>
-
-    <label for="photo">Photo:</label>
-    <input type="file" id="photo" name="photo"><br>
-
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required><br>
+    </div>
+    <div class="horizontal-form-bottom">
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" required></textarea><br>
+    </div>
+    <div class="horizontal-form-bottom">
+        <label for="photo">Photo:</label><br>
+        <input type="file" id="photo" name="photo"><br>
+    </div>
     <button type="submit">Add</button>
 </form>
 {% endif %}
@@ -57,6 +62,17 @@
 {% else %}
 <p>No animals found.</p>
 {% endif %}
+{% if pages > 1 %}
+<div>
+    {% if page > 1 %}
+    <a href="/animals?page={{ page - 1 }}" id="prev_page">Prev</a>
+    {% endif %}
+    <span>Page {{ page }} of {{ pages }}</span>
+    {% if page < pages %}
+    <a href="/animals?page={{ page + 1 }}" id="next_page">Next</a>
+    {% endif %}
+</div>
+{% endif %}
 </body>
 {% if user != None %}
 {% if user.role.value == 'staff' or user.role.value == 'admin' %}
@@ -74,7 +90,7 @@
         }
 
         // send with form data content type
-        const response = await fetch('animals/new', {
+        const response = await fetch('/staff/animals/new', {
             method: 'POST',
             body: formData
         });
@@ -86,4 +102,14 @@
 </script>
 {% endif %}
 {% endif %}
+<script>
+    // keyboard arrow navigation
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowLeft' && document.getElementById('prev_page')) {
+            document.getElementById('prev_page').click();
+        } else if (event.key === 'ArrowRight' && document.getElementById('next_page')) {
+            document.getElementById('next_page').click();
+        }
+    });
+</script>
 </html>

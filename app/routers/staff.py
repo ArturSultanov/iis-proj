@@ -5,6 +5,7 @@ from fastapi.params import Query
 from pydantic import BaseModel
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
+from app.config import settings
 from app.database import db_dependency, AnimalsOrm
 from app.utils import staff_dependency, templates, get_staff
 
@@ -37,15 +38,19 @@ def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
 
 animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
-@staff_router.get("/animals", status_code=HTTP_200_OK)
-async def staff_animals_page(request: Request, db: db_dependency, staff: staff_dependency):
-    animals_list = db.query(AnimalsOrm).all()
-    return templates.TemplateResponse("animals.html",
-                                      {
-                                          "request": request,
-                                          "user": staff,
-                                          "animals": animals_list
-                                      })
+# @staff_router.get("/animals", status_code=HTTP_200_OK)
+# async def staff_animals_page(request: Request, db: db_dependency, staff: staff_dependency, page: int = 1):
+#     animals_list = db.query(AnimalsOrm).all()
+#     display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
+#     pages = len(animals_list) // settings.PAGE_SIZE + 1
+#     return templates.TemplateResponse("animals.html",
+#                                       {
+#                                           "request": request,
+#                                           "user": staff,
+#                                           "animals": display_animals,
+#                                           "pages": pages,
+#                                           "page": page
+#                                       })
 
 @staff_router.post("/animals/new", status_code=HTTP_201_CREATED)
 async def add_animal(db: db_dependency, animal: Annotated[AnimalForm, Form()]):

@@ -48,13 +48,39 @@ async def index_page(request: Request, session: session_dependency):
     return templates.TemplateResponse("index.html", {"request": request, "user": session.user}, status_code=HTTP_200_OK)
 
 @app.get("/animals")
-async def animals_page(request: Request, db: db_dependency, session: session_dependency):
+async def animals_page(request: Request, db: db_dependency, session: session_dependency, page: int = 1):
     animals_list = db.query(AnimalsOrm).all()
+    display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
+    pages = len(animals_list) // settings.PAGE_SIZE + 1
+    if page > pages or page < 1:
+        return RedirectResponse(url="/animals")
     if not session:
-        return templates.TemplateResponse("animals.html", {"request": request, "user": None, "animals": animals_list}, status_code=HTTP_200_OK)
-    if session.user.role == Role.staff or session.user.role == Role.admin:
-        return RedirectResponse(url="/staff/animals")
-    return templates.TemplateResponse("animals.html", {"request": request, "user": session.user, "animals": animals_list}, status_code=HTTP_200_OK)
+        return templates.TemplateResponse("animals.html",
+                                          {
+                                              "request": request,
+                                              "user": None,
+                                              "animals": display_animals,
+                                              "pages": pages,
+                                              "page": page
+                                          },
+                                          status_code=HTTP_200_OK)
+    if session.user.is_staff:
+        return templates.TemplateResponse("animals.html",
+                                          {
+                                              "request": request,
+                                              "user": session.user,
+                                              "animals": display_animals,
+                                              "pages": pages,
+                                              "page": page
+                                          })
+    return templates.TemplateResponse("animals.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "animals": display_animals,
+                                          "pages": pages,
+                                          "page": page
+                                      }, status_code=HTTP_200_OK)
 
 placeholder_photo : bytes = open("static/no-image-available.jpg", "rb").read()
 

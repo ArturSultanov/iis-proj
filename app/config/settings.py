@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     SSL_CERT_ENABLED: bool
     SSL_CERT_PATH: str
     SSL_KEY_PATH: str
+    PAGE_SIZE: int
 
     @property
     def database_url(self) -> str:
