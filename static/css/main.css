@@ -63,31 +63,6 @@ button:hover {
     text-align: center;
 }
 
-form {
-    background-color: #ffffff;
-    box-shadow: 0 1px 2px #424242;
-    width: 90%;
-    max-width: 350px;
-    margin: 10px;
-    padding: 10px 20px;
-    border-radius: 8px;
-
-    button {
-        /* align button to the center */
-        display: block;
-        margin: 10px auto;
-        text-transform: uppercase;
-    }
-
-    label {
-        display: block;
-        font-weight: bold;
-        margin: 10px 0;
-        text-transform: uppercase;
-        text-align: center;
-    }
-}
-
 input[type="text"],
 input[type="number"],
 input[type="password"],
@@ -114,34 +89,4 @@ input[type="file"] {
 
 textarea {
     min-height: 60px;
-}
-
-table {
-    background-color: #ffffff;
-    box-shadow: 0 1px 2px #424242;
-    width: 90%;
-    margin: 10px;
-    border-radius: 5px;
-    border-collapse: collapse;
-
-    th {
-        background-color: #00a9e0;
-        color: #ffffff;
-        padding: 10px;
-        text-align: center;
-    }
-
-    td {
-        padding: 10px;
-        text-align: center;
-        border-bottom: 1px solid #424242;
-    }
-
-    tr:hover {
-        background-color: #f0f0f0;
-    }
-
-    img {
-        border-radius: 5px;
-    }
 }
