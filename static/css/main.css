@@ -1,0 +1,136 @@
+body {
+    font-family: Arial;
+    background-color: #f0f0f0;
+    color: #333333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px;
+}
+
+h1 {
+    color: #00a9e0;
+}
+
+p {
+    font-size: 1.2em;
+}
+
+button {
+    background-color: #00a9e0;
+    color: #ffffff;
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+}
+
+button:hover {
+    background-color: #007fa9;
+    transition: background-color 0.9s;
+}
+
+#terminate_all_sessions {
+    background-color: #e4002b;
+}
+
+#terminate_all_sessions:hover {
+    background-color: #bb0022;
+}
+
+.link {
+    background-color: #e0e0e0;
+    color: #00a9e0;
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.link:hover {
+    background-color: #d0d0d0;
+    transition: background-color 0.4s;
+}
+
+.container {
+    text-align: center;
+}
+
+form {
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px #424242;
+    width: 90%;
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+label {
+    display: block;
+    margin: 10px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="file"],
+textarea {
+    border: 1px solid #424242;
+    width: 90%;
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    border-color: #00a9e0;
+    outline: none;
+}
+
+input[type="file"] {
+    font-size: 1em;
+}
+
+textarea {
+    min-height: 60px;
+}
+
+table {
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px #424242;
+    width: 90%;
+    margin: 10px;
+    border-radius: 5px;
+    border-collapse: collapse;
+
+    th {
+        background-color: #00a9e0;
+        color: #ffffff;
+        padding: 10px;
+        text-align: center;
+    }
+
+    td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #424242;
+    }
+
+    tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    img {
+        border-radius: 5px;
+    }
+}
