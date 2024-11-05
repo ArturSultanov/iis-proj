@@ -4,33 +4,43 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="../../static/css/main.css">
+    <link rel="stylesheet" href="../../static/css/table.css">
     <style>
         .error {
             color: red;
             font-size: 0.9em;
             margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .success {
+            color: green;
+            font-size: 0.9em;
+            margin-top: 5px;
+            text-transform: uppercase;
         }
         .you {
-            background-color: lemonchiffon;
+            background-color: lightgreen;
         }
     </style>
 </head>
 <body>
 <div class="error" id="error"></div><br>
+<div class="success" id="success"></div><br>
 <table>
     <thead>
     <tr>
-        <th>ID</th>
+{#        <th>ID</th>#}
         <th>Username</th>
         <th>Name</th>
         <th>Role</th>
         <th>Active</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
     {% for user in users %}
         <tr id="user-{{ user.id }}" {% if user.id == admin.id %} class="you" {% endif %}>
-            <td>{{ user.id }}</td>
+{#            <td>{{ user.id }}</td>#}
             <td>{{ user.username }}</td>
             <td>{{ user.name }}</td>
             <td>
@@ -82,6 +92,12 @@
                 if (!response.ok) {
                     const error = await response.json();
                     document.getElementById('error').textContent = error.detail;
+                } else {
+                    document.getElementById('success').textContent = 'User state updated';
+                    // Remove the success message after 3 seconds
+                    setTimeout(function () {
+                        document.getElementById('success').textContent = '';
+                    }, 3000);
                 }
             });
         });
@@ -99,6 +115,12 @@
                 if (!response.ok) {
                     const error = await response.json();
                     document.getElementById('error').textContent = error.detail;
+                } else {
+                    document.getElementById('success').textContent = 'Role updated';
+                    // Remove the success message after 3 seconds
+                    setTimeout(function () {
+                        document.getElementById('success').textContent = '';
+                    }, 3000);
                 }
             });
         });
@@ -114,6 +136,11 @@
 
                 if (response.ok) {
                     document.getElementById(`user-${userId}`).remove();
+                    document.getElementById('success').textContent = 'User deleted';
+                    // Remove the success message after 3 seconds
+                    setTimeout(function () {
+                        document.getElementById('success').textContent = '';
+                    }, 3000);
                 } else {
                     const error = await response.json();
                     document.getElementById('error').textContent = error.detail;
