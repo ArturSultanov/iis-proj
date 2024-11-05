@@ -7,13 +7,12 @@
 </head>
 <body>
     <h1>Index</h1>
+    <a href="/animals" class="link">Animals</a><br>
     {% if not user %}
-    <a href="/user/signup" class="link">Signup here</a>
-    <br>
-    <a href="/user/signin" class="link">Signin here</a>
+    <a href="/user/signup" class="link">Signup here</a><br>
+    <a href="/user/signin" class="link">Signin here</a><br>
     {% else %}
-    <a href="/user/profile" class="link">Profile</a>
-    <br>
+    <a href="/user/profile" class="link">Profile</a><br>
     <button id="logout" class="link">Logout</button>
     {% endif %}
 </body>
