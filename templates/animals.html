@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Animals</title>
     <link rel="stylesheet" href="../static/css/main.css">
     <link rel="stylesheet" href="../static/css/table.css">
     <link rel="stylesheet" href="../static/css/horizontal_forms.css">
@@ -34,13 +34,12 @@
 </form>
 {% endif %}
 {% endif %}
+{% set ns = namespace(found=0) %}
 {% if animals %}
 <table>
     <thead>
     <tr>
-        <th>ID</th>
         <th>Name</th>
-        <th>Species</th>
         <th>Age</th>
         <th>Description</th>
         <th>Photo</th>
@@ -48,18 +47,20 @@
     </thead>
     <tbody>
     {% for animal in animals %}
-    <tr>
-        <td>{{ animal.id }}</td>
+    {% if not animal.hidden or (user != None and user.is_staff) %}
+    <tr id="{{ animal.id }}" {% if animal.hidden %} class="hidden-animal" {% endif %}>
         <td>{{ animal.name }}</td>
-        <td>{{ animal.species }}</td>
         <td>{{ animal.age }}</td>
-        <td>{{ animal.description }}</td>
+        <td>{{ animal.description[:(1+animal.description.find('.')) if animal.description.find('.') > 0 else None] }}</td>
         <td><img src="/animals/{{animal.id}}/photo" alt="{{ animal.name }}" width="100"></td>
     </tr>
+    {% set ns.found = 1 %}
+    {% endif %}
     {% endfor %}
     </tbody>
 </table>
-{% else %}
+{% endif %}
+{% if ns.found == 0 %}
 <p>No animals found.</p>
 {% endif %}
 {% if pages > 1 %}
@@ -75,7 +76,7 @@
 {% endif %}
 </body>
 {% if user != None %}
-{% if user.role.value == 'staff' or user.role.value == 'admin' %}
+{% if user.is_staff %}
 <script>
     const form = document.querySelector('form');
 
@@ -109,6 +110,14 @@
             document.getElementById('prev_page').click();
         } else if (event.key === 'ArrowRight' && document.getElementById('next_page')) {
             document.getElementById('next_page').click();
+        }
+    });
+</script>
+<script>
+    document.addEventListener('click', function (event) {
+        if (event.target.tagName === 'TD') {
+            const id = event.target.parentElement.id;
+            window.location.href = `/animals/${id}/profile`;
         }
     });
 </script>

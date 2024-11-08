@@ -123,6 +123,7 @@ class AnimalsOrm(Base):
     photo: Mapped[bytes] = mapped_column(LargeBinary(length=2**24-1), nullable=True)
     description: Mapped[Str2048] = mapped_column()
     status: Mapped[AnimalStatus] = mapped_column(default=AnimalStatus.available)
+    hidden: Mapped[bool] = mapped_column(default=False)
 
     medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="animal")
     scheduled_walks:  Mapped[list["WalksOrm"]] = relationship("WalksOrm", back_populates="animal")

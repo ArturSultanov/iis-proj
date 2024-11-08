@@ -43,36 +43,22 @@ app.add_middleware(
         allow_headers=["*"]
     )
 
-@app.get("/")
+@app.get("/", status_code=HTTP_200_OK)
 async def index_page(request: Request, session: session_dependency):
-    return templates.TemplateResponse("index.html", {"request": request, "user": session.user}, status_code=HTTP_200_OK)
+    return templates.TemplateResponse("index.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user
+                                      })
 
-@app.get("/animals")
+@app.get("/animals", status_code=HTTP_200_OK)
 async def animals_page(request: Request, db: db_dependency, session: session_dependency, page: int = 1):
     animals_list = db.query(AnimalsOrm).all()
+    animals_list.sort(key=lambda x: x.hidden)
     display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
     pages = len(animals_list) // settings.PAGE_SIZE + 1
     if page > pages or page < 1:
         return RedirectResponse(url="/animals")
-    if not session:
-        return templates.TemplateResponse("animals.html",
-                                          {
-                                              "request": request,
-                                              "user": None,
-                                              "animals": display_animals,
-                                              "pages": pages,
-                                              "page": page
-                                          },
-                                          status_code=HTTP_200_OK)
-    if session.user.is_staff:
-        return templates.TemplateResponse("animals.html",
-                                          {
-                                              "request": request,
-                                              "user": session.user,
-                                              "animals": display_animals,
-                                              "pages": pages,
-                                              "page": page
-                                          })
     return templates.TemplateResponse("animals.html",
                                       {
                                           "request": request,
@@ -80,18 +66,25 @@ async def animals_page(request: Request, db: db_dependency, session: session_dep
                                           "animals": display_animals,
                                           "pages": pages,
                                           "page": page
-                                      }, status_code=HTTP_200_OK)
+                                      })
 
 placeholder_photo : bytes = open("static/no-image-available.jpg", "rb").read()
 
-@app.get("/animals/{animal_id}/photo")
+@app.get("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def animal_photo(animal_id: int, db: db_dependency):
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal or not animal.photo:
-        return HTMLResponse(content=placeholder_photo, status_code=200, media_type="image/jpeg")
-    return HTMLResponse(content=animal.photo, status_code=200, media_type="image/jpeg")
+        return HTMLResponse(content=placeholder_photo, media_type="image/jpeg")
+    return HTMLResponse(content=animal.photo, media_type="image/jpeg")
 
-@app.get("/animals/{animal_id}")
+@app.get("/animals/{animal_id}/profile")
 async def animal_profile(request: Request, animal_id: int, db: db_dependency, session: session_dependency):
-    # animal profile
-    pass
+    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
+    if not animal:
+        return RedirectResponse(url="/animals")
+    return templates.TemplateResponse("animal/animal_profile.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "animal": animal
+                                      })

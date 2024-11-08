@@ -38,20 +38,6 @@ def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
 
 animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
-# @staff_router.get("/animals", status_code=HTTP_200_OK)
-# async def staff_animals_page(request: Request, db: db_dependency, staff: staff_dependency, page: int = 1):
-#     animals_list = db.query(AnimalsOrm).all()
-#     display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
-#     pages = len(animals_list) // settings.PAGE_SIZE + 1
-#     return templates.TemplateResponse("animals.html",
-#                                       {
-#                                           "request": request,
-#                                           "user": staff,
-#                                           "animals": display_animals,
-#                                           "pages": pages,
-#                                           "page": page
-#                                       })
-
 @staff_router.post("/animals/new", status_code=HTTP_201_CREATED)
 async def add_animal(db: db_dependency, animal: Annotated[AnimalForm, Form()]):
     new_animal = AnimalsOrm(**animal.get_dict)
@@ -65,7 +51,7 @@ async def delete_animal(db: db_dependency, animal: animal_dependency):
     db.commit()
     return {"message": "Animal deleted successfully"}
 
-@staff_router.patch("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
+@staff_router.get("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
 async def edit_animal_page(request: Request, animal: animal_dependency):
     return templates.TemplateResponse("animal/animal_edit.html", {"request": request, "animal": animal})
 
@@ -104,4 +90,10 @@ async def delete_animal_photo(db: db_dependency, animal: animal_dependency):
     animal.photo = None
     db.commit()
     return {"message": "Photo deleted successfully"}
+
+@staff_router.patch("/animals/{animal_id}/hide", status_code=HTTP_200_OK)
+async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool):
+    animal.hidden = hidden
+    db.commit()
+    return {"message": "Animal hidden successfully"}
 

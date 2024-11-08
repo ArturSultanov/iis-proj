@@ -2,22 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ animal.name }}</title>
     <link rel="stylesheet" href="../../static/css/main.css">
+    <link rel="stylesheet" href="../../static/css/animal_profile.css">
 </head>
 <body>
-    <h1>Animal Profile</h1>
-    <div>
-        <p>Name: <span id="name">{{ animal.name }}</span></p>
-        <p><img src="/animals/{{animal.id}}/photo" alt="{{ animal.name }}" width="100"></p>
-        <p>Species: <span id="species">{{ animal.species }}</span></p>
-        <p>Breed: <span id="breed">{{ animal.breed }}</span></p>
-        <p>Age: <span id="age">{{ animal.age }}</span></p>
-    </div>
-    <div>
-        <p>Description: <span id="description">{{ animal.description }}</span></p>
-        <button id="edit-description">Edit Description</button>
+    <div class="profile">
+        <header class="header-inline">
+            <nav>
+                <a href="/animals" class="link"><< ANIMALS</a>
+            </nav>
+        </header>
+        <h1>{{ animal.name }}</h1>
+        <div class="photo">
+            <img src="/animals/{{ animal.id }}/photo" alt="{{ animal.name }}" width="300">
+        </div>
+        <div class="info">
+            <span id="species">Species: {{ animal.species }}</span>
+            <span id="age">Age: {{ animal.age }}</span>
+        </div>
+        <div class="description">
+            <h3>Description</h3><span class="description-text">{{ animal.description }}</span>
+        </div>
+        {% if user and user.is_staff %}
+        <div class="animal-profile-staff-section">
+            <button class="staff-btn edit-btn" id="edit-animal-profile">Edit</button>
+            {% if not animal.hidden %}
+            <button class="staff-btn hide-btn" id="hide-animal">Hide</button>
+            {% else %}
+            <button class="staff-btn hide-btn" id="hide-animal">Show</button>
+            {% endif %}
+            <button class="staff-btn del-btn" id="delete-animal">Delete</button>
+        </div>
+
+        {% endif %}
     </div>
 </body>
+
+{% if user %}
+{% if user.is_staff %}
+<script>
+    const animalId = {{ animal.id }};
+
+    const editBtn = document.getElementById('edit-animal-profile');
+    const hideBtn = document.getElementById('hide-animal');
+    const deleteBtn = document.getElementById('delete-animal');
+
+    editBtn.addEventListener('click', () => {
+        window.location.href = `/staff/animals/${animalId}/edit`;
+    });
+
+    hideBtn.addEventListener('click', () => {
+        const hidden = {{ animal.hidden|string|lower }};
+        fetch(`/staff/animals/${animalId}/hide?hidden=${!hidden}`, {
+            method: 'PATCH',
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to hide the animal');
+                }
+            });
+    });
+
+    deleteBtn.addEventListener('click', () => {
+        // ask for confirmation
+        if (confirm('Are you sure you want to delete this animal?')) {
+            fetch(`/staff/animals/${animalId}`, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/animals';
+                    } else {
+                        alert('Failed to delete the animal');
+                    }
+                });
+        }
+    });
+</script>
+{% endif %}
+{% endif %}
 
 </html>
