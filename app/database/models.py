@@ -175,3 +175,26 @@ class VaccinationsOrm(Base):
     medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="vaccinations")
 
 
+class VetRequestStatus(enum.Enum):
+    pending = 'pending'
+    accepted = 'accepted'
+    rejected = 'completed'
+
+    @classmethod
+    def get_vet_request_statuses(cls) -> list[Self]:
+        return [status for status in cls]
+
+
+class VetRequestOrm(Base):
+    __tablename__ = 'vet_requests'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False) # todo cascade delete
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    description: Mapped[Str2048] = mapped_column()
+    status: Mapped[VetRequestStatus] = mapped_column(default=VetRequestStatus.pending)
+
+    animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm")
+    user: Mapped["UsersOrm"] = relationship("UsersOrm")
+
