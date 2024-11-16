@@ -1,11 +1,10 @@
-from typing import Annotated, Any, Self
+from typing import Annotated
 
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
-from app.config import settings
 from app.database import db_dependency, AnimalsOrm
 from app.utils import staff_dependency, templates, get_staff
 

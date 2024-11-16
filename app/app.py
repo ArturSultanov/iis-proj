@@ -17,12 +17,6 @@ from app.utils import session_dependency, templates
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.include_router(user_router)
-    app.include_router(admin_router)
-    app.include_router(staff_router)
-
-    app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
-
     create_all_tables()
     start_db = next(get_db())
     dbBase.metadata.create_all(start_db.get_bind())
@@ -34,6 +28,14 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(user_router)
+app.include_router(admin_router)
+app.include_router(staff_router)
+app.include_router(vet_router)
+app.include_router(volunteer_router)
+
+app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
         CORSMiddleware,

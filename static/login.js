@@ -38,5 +38,3 @@ if (password) {
     document.getElementById('password').value = password;
 }
 localStorage.clear();
-
-// todo remove error on input change
