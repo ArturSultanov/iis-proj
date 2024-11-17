@@ -4,11 +4,12 @@ from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_202_ACCEPTED
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_202_ACCEPTED, HTTP_303_SEE_OTHER
 
 from app.database import db_dependency, AnimalsOrm
-from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role
+from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm
 from app.utils import staff_dependency, templates, get_staff, application_status_to_int
+from datetime import datetime, timezone
 
 staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
@@ -147,3 +148,26 @@ async def update_application_status(db: db_dependency, application_id: int, stat
     return {"message": "Application status updated successfully", "status": status.value}
 
 
+@staff_router.get("/animals/{animal_id}/vet_request", status_code=HTTP_200_OK)
+async def vet_request_page(request: Request, animal: animal_dependency, staff: staff_dependency):
+    return templates.TemplateResponse("animal/vet_request_page.html", {"request": request, "animal": animal})
+
+
+@staff_router.get("/animals/{animal_id}/profile", status_code=HTTP_200_OK)
+async def animal_profile(request: Request, animal: animal_dependency):
+    return templates.TemplateResponse("animal/profile.html", {"request": request, "animal": animal})
+
+
+@staff_router.post("/animals/{animal_id}/vet_request", status_code=HTTP_201_CREATED)
+async def create_vet_request(db: db_dependency, animal: animal_dependency, staff: staff_dependency, description: str = Form(...),
+):
+    new_request = VetRequestOrm(
+        animal_id=animal.id,
+        user_id=staff.id,
+        date=datetime.now(timezone.utc),
+        description=description,
+        status=VetRequestStatus.pending
+    )
+    db.add(new_request)
+    db.commit()
+    return RedirectResponse(url=f"/animals/{animal.id}/profile", status_code=HTTP_303_SEE_OTHER)

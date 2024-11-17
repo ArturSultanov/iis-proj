@@ -32,9 +32,9 @@
             {% else %}
             <button class="staff-btn hide-btn" id="hide-animal">Show</button>
             {% endif %}
+            <button class="staff-btn create-request-btn" id="create-request">Create Vet Request</button>
             <button class="staff-btn del-btn" id="delete-animal">Delete</button>
         </div>
-
         {% endif %}
     </div>
 </body>
@@ -47,9 +47,14 @@
     const editBtn = document.getElementById('edit-animal-profile');
     const hideBtn = document.getElementById('hide-animal');
     const deleteBtn = document.getElementById('delete-animal');
+    const createRequestBtn = document.getElementById('create-request');
 
     editBtn.addEventListener('click', () => {
         window.location.href = `/staff/animals/${animalId}/edit`;
+    });
+
+    createRequestBtn.addEventListener('click', () => {
+        window.location.href = `/staff/animals/${animalId}/vet_request`;
     });
 
     hideBtn.addEventListener('click', () => {
