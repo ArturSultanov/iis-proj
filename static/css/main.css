@@ -58,6 +58,7 @@ button {
     border-radius: 5px;
     font-weight: bold;
     text-decoration: none;
+    text-align: center;
 }
 
 .link:hover {

@@ -3,9 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
+from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 
 from app.database import db_dependency, AnimalsOrm
+from app.database.models import VolunteerApplicationsOrm
 from app.utils import staff_dependency, templates, get_staff
 
 staff_router = APIRouter(prefix="/staff",
@@ -37,6 +39,10 @@ def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
 
 animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
+@staff_router.get("/dashboard", status_code=HTTP_200_OK)
+async def staff_dashboard(request: Request, staff: staff_dependency):
+    return templates.TemplateResponse("staff/dashboard.html", {"request": request, "staff": staff})
+
 @staff_router.post("/animals/new", status_code=HTTP_201_CREATED)
 async def add_animal(db: db_dependency, animal: Annotated[AnimalForm, Form()]):
     new_animal = AnimalsOrm(**animal.get_dict)
@@ -52,7 +58,7 @@ async def delete_animal(db: db_dependency, animal: animal_dependency):
 
 @staff_router.get("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
 async def edit_animal_page(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("animal/animal_edit.html", {"request": request, "animal": animal})
+    return templates.TemplateResponse("animal/edit_page.html", {"request": request, "animal": animal})
 
 @staff_router.patch("/animals/{animal_id}/name", status_code=HTTP_200_OK)
 async def edit_animal_name(db: db_dependency, animal: animal_dependency, new_name: str = Query(...)):
@@ -95,4 +101,20 @@ async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool
     animal.hidden = hidden
     db.commit()
     return {"message": "Animal hidden successfully"}
+
+@staff_router.get("/volunteer_applications")
+async def volunteer_applications(request: Request, db: db_dependency, limit: int = Query(10), page: int = Query(1)):
+    applications_list = db.query(VolunteerApplicationsOrm).all()
+    applications_list.sort(key=lambda x: x.id) # todo sorting
+    display_applications = applications_list[(page-1)*limit:page*limit]
+    pages = len(applications_list) // limit + 1
+    if page > pages or page < 1:
+        return RedirectResponse(url="/volunteer_applications")
+    return templates.TemplateResponse("staff/volunteer_applications.html",
+                                      {
+                                          "request": request,
+                                          "applications": display_applications,
+                                          "pages": pages,
+                                          "page": page
+                                      })
 

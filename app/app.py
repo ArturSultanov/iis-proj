@@ -84,7 +84,7 @@ async def animal_profile(request: Request, animal_id: int, db: db_dependency, se
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal:
         return RedirectResponse(url="/animals")
-    return templates.TemplateResponse("animal/animal_profile.html",
+    return templates.TemplateResponse("animal/profile.html",
                                       {
                                           "request": request,
                                           "user": session.user,

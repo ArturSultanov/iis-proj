@@ -30,7 +30,7 @@ class LoginFormIn(BaseModel):
 async def register_page(request: Request, session: session_dependency):
     if session:
         return RedirectResponse(url="/user/profile")
-    return templates.TemplateResponse("signup.html", {"request": request})
+    return templates.TemplateResponse("user/signup.html", {"request": request})
 
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def register_user(db: db_dependency, form: RegisterFormIn, session: session_dependency):
@@ -55,7 +55,7 @@ async def register_user(db: db_dependency, form: RegisterFormIn, session: sessio
 async def login_page(request: Request, session: session_dependency):
     if session:
         return RedirectResponse(url="/user/profile")
-    return templates.TemplateResponse("signin.html", {"request": request})
+    return templates.TemplateResponse("user/signin.html", {"request": request})
 
 @user_router.post("/signin", status_code=status.HTTP_200_OK)
 async def login_user(db: db_dependency, form: LoginFormIn, session: session_dependency):
@@ -112,5 +112,14 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
 async def profile_page(request: Request, session: session_dependency):
     if not session:
         return RedirectResponse(url="/user/signin")
-    return templates.TemplateResponse("profile.html", {"request": request, "user": session.user})
+    return templates.TemplateResponse("user/profile.html", {"request": request, "user": session.user})
+
+@user_router.get("/volunteer_application", status_code=status.HTTP_200_OK)
+async def volunteer_application_page(request: Request, session: session_dependency):
+    if not session:
+        return RedirectResponse(url="/user/signin")
+    if not session.user.is_registered:
+        return RedirectResponse(url="/user/profile")
+    app
+    return templates.TemplateResponse("user/volunteer_application.html", {"request": request})
 

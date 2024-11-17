@@ -21,7 +21,7 @@ def validate_user_operation(user: UsersOrm, admin: UsersOrm):
 
 @admin_router.get("/dashboard", status_code=HTTP_200_OK)
 async def admin_page(request: Request, admin: admin_dependency):
-    return templates.TemplateResponse("admin/admin_dashboard.html",
+    return templates.TemplateResponse("admin/dashboard.html",
                                       {
                                           "request": request,
                                           "admin": admin
@@ -31,7 +31,7 @@ async def admin_page(request: Request, admin: admin_dependency):
 @admin_router.get("/users", status_code=HTTP_200_OK)
 async def users_page(request: Request, db: db_dependency, admin: admin_dependency):
     users = db.query(UsersOrm).all()
-    return templates.TemplateResponse("admin/admin_users.html",
+    return templates.TemplateResponse("admin/users.html",
                                       {
                                           "request": request,
                                           "admin": admin,

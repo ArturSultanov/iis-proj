@@ -31,9 +31,12 @@ class UsersOrm(Base):
     role: Mapped[Role] = mapped_column(default=Role.registered)
     disabled: Mapped[bool] = mapped_column(default=False)
 
-    sessions: Mapped[list["SessionsOrm"]] = relationship("SessionsOrm", back_populates="user")
-    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = relationship("AdoptionRequestsOrm", back_populates="user")
-    volunteer_application: Mapped["VolunteerApplicationsOrm"] = relationship("VolunteerApplicationsOrm", back_populates="user")
+    sessions: Mapped[list["SessionsOrm"]] = (
+        relationship("SessionsOrm", back_populates="user", cascade="all, delete"))
+    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = (
+        relationship("AdoptionRequestsOrm", back_populates="user", cascade="all, delete"))
+    volunteer_application: Mapped["VolunteerApplicationsOrm"] = (
+        relationship("VolunteerApplicationsOrm", back_populates="user", cascade="all, delete"))
 
     @classmethod
     def get_user(cls, db: Session, username: str) -> Self | None:
@@ -55,6 +58,10 @@ class UsersOrm(Base):
     def is_volunteer(self) -> bool:
         return self.role == Role.volunteer or self.is_admin
 
+    @property
+    def is_registered(self) -> bool:
+        return self.role == Role.registered
+
     def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
         session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
         db.add(session)
@@ -65,7 +72,7 @@ class VolunteerApplicationsOrm(Base):
     __tablename__ = 'volunteer_applications'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False) # todo cascade delete
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[bool] = mapped_column(default=False)
     message: Mapped[Str2048] = mapped_column(nullable=True)
@@ -125,9 +132,14 @@ class AnimalsOrm(Base):
     status: Mapped[AnimalStatus] = mapped_column(default=AnimalStatus.available)
     hidden: Mapped[bool] = mapped_column(default=False)
 
-    medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="animal")
-    scheduled_walks:  Mapped[list["WalksOrm"]] = relationship("WalksOrm", back_populates="animal")
-    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = relationship("AdoptionRequestsOrm", back_populates="animal")
+    medical_history: Mapped["MedicalHistoriesOrm"] = (
+        relationship("MedicalHistoriesOrm", back_populates="animal", cascade="all, delete"))
+    scheduled_walks:  Mapped[list["WalksOrm"]] = (
+        relationship("WalksOrm", back_populates="animal", cascade="all, delete"))
+    adoption_requests: Mapped[list["AdoptionRequestsOrm"]] = (
+        relationship("AdoptionRequestsOrm", back_populates="animal", cascade="all, delete"))
+    vet_requests: Mapped[list["VetRequestOrm"]] = (
+        relationship("VetRequestOrm", back_populates="animal", cascade="all, delete"))
 
 class WalksOrm(Base):
     __tablename__ = 'walks'
@@ -151,8 +163,10 @@ class MedicalHistoriesOrm(Base):
 
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="medical_history")
 
-    treatments: Mapped[list["TreatmentsOrm"]] = relationship("TreatmentsOrm", back_populates="medical_history")
-    vaccinations: Mapped[list["VaccinationsOrm"]] = relationship("VaccinationsOrm", back_populates="medical_history")
+    treatments: Mapped[list["TreatmentsOrm"]] = (
+        relationship("TreatmentsOrm", back_populates="medical_history", cascade="all, delete"))
+    vaccinations: Mapped[list["VaccinationsOrm"]] = (
+        relationship("VaccinationsOrm", back_populates="medical_history", cascade="all, delete"))
 
 class TreatmentsOrm(Base):
     __tablename__ = 'treatments'
