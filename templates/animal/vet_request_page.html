@@ -2,19 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vet Request</title>
     <link rel="stylesheet" href="../../static/css/horizontal_forms.css">
     <link rel="stylesheet" href="../../static/css/vertical_forms.css">
     <link rel="stylesheet" href="../../static/css/main.css">
     <link rel="stylesheet" href="../../static/css/animal_profile.css">
+    <style>
+
+        .form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        label {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        textarea {
+            width: 95%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
-    <h1>Veterinarian Request For Animal: {{ animal.name }}</h1>
-    <form method="post" action="/staff/animals/{{ animal.id }}/vet_request">
-        <label for="description">Description of the issue:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
-        <button type="submit">Create</button>
-        <a href="/animals/{{ animal.id }}/profile" class="button">Back</a>
-    </form>
+        <h1>Veterinarian Request For Animal: {{ animal.name }}</h1>
+        <div class="form">
+        <form id="vet_request_form">
+            <div class="container" style="align-items: center">
+                <label for="description">Description of the issue:</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+            <div class="container">
+                <button type="submit">Create Request</button>
+            </div>
+        </form>
+        <div class="container">
+            <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>
+        </div>
+    </div>
 </body>
+<script>
+    const animalId = {{ animal.id }};
+    const vetRequestForm = document.getElementById('vet_request_form');
+
+    vetRequestForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(vetRequestForm);
+
+        const response = await fetch(`/staff/new_request/${animalId}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            window.location.href = `/animals/${animalId}/profile`;
+        }
+    });
+</script>
 </html>

@@ -68,6 +68,8 @@ button {
 
 .container {
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 
 input[type="text"],

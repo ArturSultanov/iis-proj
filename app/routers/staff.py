@@ -109,8 +109,7 @@ async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool
 async def volunteer_applications(request: Request, db: db_dependency, limit: int = Query(10), page: int = Query(1)):
     applications_list = db.query(VolunteerApplicationsOrm).all()
     # sort by status, then by date, then by id
-    applications_list.sort(key=lambda x: (application_status_to_int(x.status), x.date, x.id),
-                           reverse=True)
+    applications_list.sort(key=lambda x: (application_status_to_int(x.status), x.date, x.id))
     display_applications = applications_list[(page-1)*limit:page*limit]
     pages = len(applications_list) // limit + 1
     if page > pages or page < 1:
@@ -149,17 +148,12 @@ async def update_application_status(db: db_dependency, application_id: int, stat
     return {"message": "Application status updated successfully", "status": status.value}
 
 
-@staff_router.get("/animals/{animal_id}/vet_request", status_code=HTTP_200_OK)
-async def vet_request_page(request: Request, animal: animal_dependency, staff: staff_dependency):
+@staff_router.get("/new_request/{animal_id}", status_code=HTTP_200_OK)
+async def vet_request_page(request: Request, animal: animal_dependency):
     return templates.TemplateResponse("animal/vet_request_page.html", {"request": request, "animal": animal})
 
 
-@staff_router.get("/animals/{animal_id}/profile", status_code=HTTP_200_OK)
-async def animal_profile(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("animal/profile.html", {"request": request, "animal": animal})
-
-
-@staff_router.post("/animals/{animal_id}/vet_request", status_code=HTTP_201_CREATED)
+@staff_router.post("/new_request/{animal_id}", status_code=HTTP_201_CREATED)
 async def create_vet_request(db: db_dependency, animal: animal_dependency, staff: staff_dependency, description: str = Form(...),
 ):
     new_request = VetRequestOrm(
@@ -171,4 +165,4 @@ async def create_vet_request(db: db_dependency, animal: animal_dependency, staff
     )
     db.add(new_request)
     db.commit()
-    return RedirectResponse(url=f"/animals/{animal.id}/profile", status_code=HTTP_303_SEE_OTHER)
+    return {"message": "Request created successfully"}
