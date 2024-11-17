@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Walk History</title>
+</head>
+<body>
+    <h1>Walk History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Animal Name</th>
+                <th>Date</th>
+                <th>Duration</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for walk in walks %}
+            <tr>
+                <td>{{ walk.animal_name }}</td>
+                <td>{{ walk.date }}</td>
+                <td>{{ walk.duration }} minutes</td>
+                <td>{{ walk.location }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

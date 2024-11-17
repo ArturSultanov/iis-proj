@@ -150,6 +150,7 @@ class WalksOrm(Base):
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)
     location: Mapped[Str256] = mapped_column()
+    status: Mapped[AdoptionStatus] = mapped_column(default=AdoptionStatus.pending)
 
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="scheduled_walks")
 
