@@ -109,7 +109,8 @@ async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool
 async def volunteer_applications(request: Request, db: db_dependency, limit: int = Query(10), page: int = Query(1)):
     applications_list = db.query(VolunteerApplicationsOrm).all()
     # sort by status, then by date, then by id
-    applications_list.sort(key=lambda x: (application_status_to_int(x.status.value), x.date, x.id), reverse=True)
+    applications_list.sort(key=lambda x: (application_status_to_int(x.status), x.date, x.id),
+                           reverse=True)
     display_applications = applications_list[(page-1)*limit:page*limit]
     pages = len(applications_list) // limit + 1
     if page > pages or page < 1:
