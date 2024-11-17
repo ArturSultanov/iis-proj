@@ -17,26 +17,33 @@ from app.utils import session_dependency, templates
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # create all tables if not exists
     create_all_tables()
+    # create a session to add the admin user if not exists
     start_db = next(get_db())
-    dbBase.metadata.create_all(start_db.get_bind())
+    # dbBase.metadata.create_all(start_db.get_bind())
     # add admin user if not exists
     if not UsersOrm.get_user(start_db, "admin"):
+        # add admin user with password "admin"
         start_db.add(UsersOrm(username="admin", name="admin", password=hash_password("admin"), role=Role.admin))
         start_db.commit()
         start_db.close()
     yield
 
+# Create the FastAPI app
 app = FastAPI(lifespan=lifespan)
 
+# Add routers to the app
 app.include_router(user_router)
 app.include_router(admin_router)
 app.include_router(staff_router)
 app.include_router(vet_router)
 app.include_router(volunteer_router)
 
+# Add static files to the app
 app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="static")
 
+# Add middleware to the app
 app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -56,10 +63,13 @@ async def index_page(request: Request, session: session_dependency):
 @app.get("/animals", status_code=HTTP_200_OK)
 async def animals_page(request: Request, db: db_dependency, session: session_dependency, page: int = 1):
     animals_list = db.query(AnimalsOrm).all()
+    # sort animals by hidden status, so hidden animals will be displayed at the end
     animals_list.sort(key=lambda x: x.hidden)
+    # slice the list to display only the animals on the current page
     display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
     pages = len(animals_list) // settings.PAGE_SIZE + 1
     if page > pages or page < 1:
+        # if the page is out of range, redirect to the first page
         return RedirectResponse(url="/animals")
     return templates.TemplateResponse("animals.html",
                                       {
@@ -70,6 +80,7 @@ async def animals_page(request: Request, db: db_dependency, session: session_dep
                                           "page": page
                                       })
 
+# This is a placeholder photo that will be used if the animal does not have a photo
 placeholder_photo : bytes = open("static/no-image-available.jpg", "rb").read()
 
 @app.get("/animals/{animal_id}/photo", status_code=HTTP_200_OK)

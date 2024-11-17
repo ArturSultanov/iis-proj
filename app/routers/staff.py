@@ -14,6 +14,7 @@ staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
                          dependencies=[Depends(get_staff)])
 
+# Form to add a new animal
 class AnimalForm(BaseModel):
     name: str
     species: str
@@ -31,6 +32,7 @@ class AnimalForm(BaseModel):
             "photo": self.photo.file.read() if self.photo else None
         }
 
+# Dependency to get an animal by id
 def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal:

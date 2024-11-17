@@ -60,7 +60,7 @@ class UsersOrm(Base):
 
     @property
     def is_registered(self) -> bool:
-        return self.role == Role.registered or self.is_admin
+        return self.role == Role.registered or self.is_admin # todo remove admin
 
     def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
         session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
