@@ -12,6 +12,8 @@ from app.config import settings
 from app.database import UsersOrm, Role, db_dependency, SessionsOrm
 from typing import Annotated as typingAnnotated
 
+from app.database.models import ApplicationStatus
+
 session_duration = timedelta(hours=1)
 
 session_id_cookie = "session_id"
@@ -102,6 +104,15 @@ def get_volunteer(user: user_dependency) -> UsersOrm:
     if not user.is_volunteer:
         raise forbidden_exception
     return user
+
+def application_status_to_int(status: ApplicationStatus) -> int:
+    # pending = 0, accepted = 1, rejected = 2
+    if status == ApplicationStatus.pending:
+        return 0
+    elif status == ApplicationStatus.accepted:
+        return 1
+    elif status == ApplicationStatus.rejected:
+        return 2
 
 admin_dependency = typingAnnotated[UsersOrm, Depends(get_admin)]
 staff_dependency = typingAnnotated[UsersOrm, Depends(get_staff)]

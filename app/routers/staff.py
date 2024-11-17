@@ -4,11 +4,11 @@ from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_202_ACCEPTED
 
 from app.database import db_dependency, AnimalsOrm
-from app.database.models import VolunteerApplicationsOrm
-from app.utils import staff_dependency, templates, get_staff
+from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role
+from app.utils import staff_dependency, templates, get_staff, application_status_to_int
 
 staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
@@ -105,7 +105,8 @@ async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool
 @staff_router.get("/volunteer_applications")
 async def volunteer_applications(request: Request, db: db_dependency, limit: int = Query(10), page: int = Query(1)):
     applications_list = db.query(VolunteerApplicationsOrm).all()
-    applications_list.sort(key=lambda x: x.id) # todo sorting
+    # sort by status, then by date, then by id
+    applications_list.sort(key=lambda x: (application_status_to_int(x.status.value), x.date, x.id), reverse=True)
     display_applications = applications_list[(page-1)*limit:page*limit]
     pages = len(applications_list) // limit + 1
     if page > pages or page < 1:
@@ -117,4 +118,30 @@ async def volunteer_applications(request: Request, db: db_dependency, limit: int
                                           "pages": pages,
                                           "page": page
                                       })
+
+@staff_router.patch("/volunteer_applications/{application_id}", status_code=HTTP_200_OK)
+async def update_application_status(db: db_dependency, application_id: int, status: ApplicationStatus = Query(...)):
+    application = db.query(VolunteerApplicationsOrm).filter(VolunteerApplicationsOrm.id == application_id).first()
+
+    if not application:
+        # application not found
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Application not found")
+    if application.status != ApplicationStatus.pending:
+        # application already processed
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Application already processed")
+
+    # update user role if application is accepted
+    application.status = status
+
+    if status == ApplicationStatus.accepted:
+        if application.user.is_registered and not application.user.is_volunteer:
+            # user is already registered and not a volunteer already
+            application.user.role = Role.volunteer
+        elif not application.user.is_volunteer:
+            # user is
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="User already has a role")
+
+    db.commit()
+    return {"message": "Application status updated successfully", "status": status.value}
+
 

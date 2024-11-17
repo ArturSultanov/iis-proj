@@ -1,4 +1,5 @@
-from datetime import timezone
+from datetime import timezone, datetime
+from wsgiref.util import application_uri
 
 from fastapi import APIRouter, Request, HTTPException, Form, Depends
 from pydantic import BaseModel
@@ -6,6 +7,7 @@ from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 
 from app.database import db_dependency, UsersOrm
+from app.database.models import VolunteerApplicationsOrm
 from app.password import hash_password, verify_password
 from app.utils import session_dependency, session_id_cookie, create_session, templates
 
@@ -112,7 +114,11 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
 async def profile_page(request: Request, session: session_dependency):
     if not session:
         return RedirectResponse(url="/user/signin")
-    return templates.TemplateResponse("user/profile.html", {"request": request, "user": session.user})
+    return templates.TemplateResponse("user/profile.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user
+                                      })
 
 @user_router.get("/volunteer_application", status_code=status.HTTP_200_OK)
 async def volunteer_application_page(request: Request, session: session_dependency):
@@ -120,6 +126,27 @@ async def volunteer_application_page(request: Request, session: session_dependen
         return RedirectResponse(url="/user/signin")
     if not session.user.is_registered:
         return RedirectResponse(url="/user/profile")
-    app
-    return templates.TemplateResponse("user/volunteer_application.html", {"request": request})
+    application = session.user.volunteer_application
+    return templates.TemplateResponse("user/volunteer_application.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "application": application
+                                      })
+
+@user_router.post("/volunteer_application", status_code=status.HTTP_201_CREATED)
+async def volunteer_application(db: db_dependency, session: session_dependency, description: str = Form(...)):
+    if not session:
+        return {"message": "Not logged in"}
+    if not session.user.is_registered:
+        return {"message": "Already have other role"}
+    application = session.user.volunteer_application
+    if application:
+        return {"message": "Application already exists"}
+    application = VolunteerApplicationsOrm()
+    application.user = session.user
+    application.date = datetime.now()
+    application.message = description
+    db.add(application)
+    db.commit()
 

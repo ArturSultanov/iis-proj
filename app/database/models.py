@@ -60,7 +60,7 @@ class UsersOrm(Base):
 
     @property
     def is_registered(self) -> bool:
-        return self.role == Role.registered
+        return self.role == Role.registered or self.is_admin
 
     def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
         session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
@@ -68,14 +68,23 @@ class UsersOrm(Base):
         db.commit()
         return session.token
 
+class ApplicationStatus(enum.Enum):
+    pending = 'pending'
+    accepted = 'accepted'
+    rejected = 'rejected'
+
+    @classmethod
+    def get_application_statuses(cls) -> list[Self]:
+        return [status for status in cls]
+
 class VolunteerApplicationsOrm(Base):
     __tablename__ = 'volunteer_applications'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    status: Mapped[bool] = mapped_column(default=False)
-    message: Mapped[Str2048] = mapped_column(nullable=True)
+    status: Mapped[ApplicationStatus] = mapped_column(default=ApplicationStatus.pending, nullable=False)
+    message: Mapped[Str2048] = mapped_column(nullable=False)
 
     user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="volunteer_application")
 

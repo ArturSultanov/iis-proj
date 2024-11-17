@@ -3,15 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>Volunteer Application</title>
+    <link rel="stylesheet" href="../../static/css/main.css">
 </head>
+<style>
+    .centered-content {
+        display: flex;
+        flex-direction: column; /* Stacks items vertically */
+        align-items: center;   /* Centers items horizontally */
+        text-align: center;    /* Centers text inside the <p> tags */
+    }
+    .rejected {
+        background-color: lightcoral;
+    }
+    .accepted {
+        background-color: lightgreen;
+    }
+    .pending {
+        background-color: orange;
+    }
+</style>
 <body>
 <h1>Volunteer Application</h1>
 {% if not application %}
-<form>
-
-</form>
+    <div style="max-width: 1000px">
+        <span>You have not submitted a volunteer application. If you would like to volunteer, please fill out the form below.
+        Write a brief description of why you would like to volunteer and what you hope to achieve. We will review your
+            application and get back to you as soon as possible. Thank you!
+        </span>
+        <form id="application_form">
+            <label for="description">Description:</label><br>
+            <textarea name="description" id="description" cols="30" rows="10" required></textarea><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
 {% else %}
-
+    <div style="max-width: 1000px">
+    {% if application.status.value == 'pending' %}
+        <span>Your volunteer application has been submitted. We will review your application and get back to you as soon as possible. Thank you!</span>
+    {% elif application.status.value == 'accepted' %}
+        <span>Your volunteer application has been accepted. We look forward to working with you!</span>
+    {% elif application.status.value == 'rejected' %}
+        <span>Your volunteer application has been rejected. We appreciate your interest in volunteering with us.</span>
+    {% endif %}
+        <div class="centered-content">
+            <p class="{{ application.status.value }}">STATUS: {{ application.status.value | upper }}</p>
+            <label for="description">Description:</label>
+            <p id="description">{{ application.message }}</p>
+        </div>
+    </div>
 {% endif %}
 </body>
+{% if not application %}
+<script>
+    document.getElementById('application_form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const response = await fetch('/user/volunteer_application', {
+            method: 'POST',
+            body: formData
+        });
+        if (response.ok) {
+            window.location.reload();
+        }
+    });
+</script>
+{% endif %}
 </html>
