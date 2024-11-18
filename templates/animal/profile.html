@@ -49,6 +49,7 @@
 </body>
 
 {% if user %}
+{% if user.is_staff %}
 <script>
     const animalId = {{ animal.id }};
 
@@ -94,7 +95,11 @@
                 });
         }
     });
+</script>
+{% endif %}
 
+{% if user.is_vet %}
+<script>
     const historyBtn = document.getElementById('create-history');
     const treatmentBtn = document.getElementById('add-treatment');
     const vaccinationBtn = document.getElementById('add-vaccination');
@@ -111,6 +116,7 @@
         window.location.href = `/vet/new_vaccination/${animalId}`;
     });
 </script>
-{% endif %}
 
+{% endif %}
+{% endif %}
 </html>

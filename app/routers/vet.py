@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Request, Form, HTTPException, status
 from fastapi.params import Depends
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED
+from typing import Annotated
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from datetime import datetime, timezone
-from app.routers.staff import animal_dependency
+
 from app.utils import get_vet, vet_dependency, templates
 from app.database import db_dependency, VetRequestOrm, VetRequestStatus, MedicalHistoriesOrm, TreatmentsOrm, AnimalsOrm, \
     VaccinationsOrm
@@ -11,6 +12,16 @@ from app.utils import get_vet, vet_dependency, templates
 vet_router = APIRouter(prefix="/vet",
                        tags=["vet"],
                        dependencies=[Depends(get_vet)])
+
+
+def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
+    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
+    if not animal:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found")
+    return animal
+
+
+animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
 
 @vet_router.get("/dashboard", status_code=HTTP_200_OK)
@@ -65,7 +76,7 @@ async def complete_vet_request(request_id: int, db: db_dependency):
 
 @vet_router.get("/new_treatment/{animal_id}", status_code=HTTP_200_OK)
 async def treatment(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("animal/treatment.html", {"request": request, "animal": animal})
+    return templates.TemplateResponse("vet/treatment.html", {"request": request, "animal": animal})
 
 
 @vet_router.post("/new_treatment/{animal_id}", status_code=HTTP_201_CREATED)
@@ -86,7 +97,7 @@ async def create_treatment(db: db_dependency, animal: animal_dependency, date: d
 
 @vet_router.get("/new_vaccination/{animal_id}", status_code=HTTP_200_OK)
 async def vaccination(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("animal/vaccination.html", {"request": request, "animal": animal})
+    return templates.TemplateResponse("vet/vaccination.html", {"request": request, "animal": animal})
 
 
 @vet_router.post("/new_vaccination/{animal_id}", status_code=HTTP_201_CREATED)
@@ -107,7 +118,7 @@ async def create_vaccination(db: db_dependency, animal: animal_dependency, date:
 
 @vet_router.get("/new_medical_history/{animal_id}", status_code=HTTP_200_OK)
 async def medical_history(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("animal/medical_history.html", {"request": request, "animal": animal})
+    return templates.TemplateResponse("vet/medical_history.html", {"request": request, "animal": animal})
 
 
 @vet_router.post("/new_medical_history/{animal_id}", status_code=HTTP_201_CREATED)
