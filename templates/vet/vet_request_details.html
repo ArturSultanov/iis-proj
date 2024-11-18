@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vet Request Details</title>
+    <link rel="stylesheet" href="../../static/css/main.css">
+</head>
+<body>
+    <h1>Vet Request Details</h1>
+
+    <p><strong>Request ID:</strong> {{ vet_request.id }}</p>
+    <p><strong>Animal:</strong>
+        <a href="/animals/{{ vet_request.animal.id }}/profile" class="link">
+            {{ vet_request.animal.name }}
+        </a>
+    </p>
+    <p><strong>Requested By:</strong> {{ vet_request.user.name }}</p>
+    <p><strong>Date:</strong> {{ vet_request.date.strftime('%Y-%m-%d %H:%M') }}</p>
+    <p><strong>Description:</strong> {{ vet_request.description }}</p>
+    <p><strong>Status:</strong> <span id="status">{{ vet_request.status.value }}</span></p>
+
+
+    {% if vet_request.status.value == "pending" %}
+        <button id="accept-btn">Accept Request</button>
+        <button id="complete-btn">Complete Request</button>
+    {% endif %}
+
+    {% if vet_request.status.value == "accepted" %}
+        <button id="complete-btn">Complete Request</button>
+    {% endif %}
+
+    <div class="container">
+        <a href="/vet/requests" class="link">Back to Vet Requests</a>
+    </div>
+
+     <script>
+         const accept = document.getElementById('accept-btn');
+         const complete = document.getElementById('complete-btn');
+
+         accept?.addEventListener('click', function() {
+            fetch(`/vet/request/{{ vet_request.id }}/accept`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('status').innerText = 'accepted';
+                    accept.style.display = 'none';
+                    window.parent.postMessage({ action: 'updateStatus', requestId: {{ vet_request.id }}, status: 'accepted' }, '*');
+                } else {
+                    alert('Failed to accept the request.');
+                }
+            });
+         });
+
+         complete?.addEventListener('click', function() {
+            fetch(`/vet/request/{{ vet_request.id }}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('status').innerText = 'completed';
+                    complete.style.display = 'none';
+                    accept.style.display = 'none';
+                    window.parent.postMessage({ action: 'updateStatus', requestId: {{ vet_request.id }}, status: 'completed' }, '*');
+                } else {
+                    alert('Failed to complete the request.');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

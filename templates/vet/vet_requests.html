@@ -4,8 +4,94 @@
     <meta charset="UTF-8">
     <title>Vet requests</title>
     <link rel="stylesheet" href="../../static/css/main.css">
+    <link rel="stylesheet" href="../../static/css/table.css">
+    <style>
+        select {
+            border: 1px solid #424242;
+            width: 40%;
+            margin: 10px;
+            padding: 5px 5px;
+            border-radius: 5px;
+            font-size: 1em;
+            background-color: #ffffff;
+            color: #333333;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: #00a9e0;
+            outline: none;
+        }
+
+    </style>
 </head>
 <body>
-<h1>Vet requests</h1>
+    <h1>Vet Requests</h1>
+    <div>
+        <label for="status">Filter by status:</label>
+        <select name="status" id="status">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="accepted">Accepted</option>
+            <option value="completed">Completed</option>
+        </select>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Animal</th>
+                <th>Requested By</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="vet-requests-body">
+            {% for vet_request in vet_requests %}
+            <tr class="vet-request-row" data-status="{{ vet_request.status.value }}" data-id="{{ vet_request.id }}">
+                <td>{{ vet_request.id }}</td>
+                <td>{{ vet_request.animal.name }}</td>
+                <td>{{ vet_request.user.name }}</td>
+                <td>{{ vet_request.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ vet_request.status.value }}</td>
+                <td>
+                    <a href="/vet/request/{{ vet_request.id }}" class="link">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+
+    <script>
+        document.getElementById('status').addEventListener('change', function () {
+            const selectedStatus = this.value;
+            const rows = document.querySelectorAll('.vet-request-row');
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (selectedStatus === "" || status === selectedStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        window.addEventListener('message', function(event) {
+            if (event.data.action === 'updateStatus') {
+                const requestId = event.data.requestId;
+                const newStatus = event.data.status;
+
+                const row = document.querySelector(`.vet-request-row[data-id="${requestId}"]`);
+                if (row) {
+                    row.querySelector('td:nth-child(5)').innerText = newStatus;
+                    row.setAttribute('data-status', newStatus);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
