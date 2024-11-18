@@ -100,6 +100,7 @@
 
 {% if user.is_vet %}
 <script>
+    const animalId = {{ animal.id }};
     const historyBtn = document.getElementById('create-history');
     const treatmentBtn = document.getElementById('add-treatment');
     const vaccinationBtn = document.getElementById('add-vaccination');

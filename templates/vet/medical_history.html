@@ -39,7 +39,12 @@
             });
 
             if (response.ok) {
-                window.location.href = `/animals/${animalId}/profile`;
+                const data = await response.json();
+                if (data.message === "Medical history created successfully") {
+                    window.location.href = `/animals/${animalId}/profile`;
+                } else {
+                    alert("Error: " + data.message);
+                }
             } else {
                 alert("Error: Failed to create medical history.");
             }

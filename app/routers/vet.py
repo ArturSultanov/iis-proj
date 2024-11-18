@@ -82,7 +82,7 @@ async def treatment(request: Request, animal: animal_dependency):
 @vet_router.post("/new_treatment/{animal_id}", status_code=HTTP_201_CREATED)
 async def create_treatment(db: db_dependency, animal: animal_dependency, date: datetime = Form(...), description: str = Form(...)):
     animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
-    if not medical_history:
+    if not animal_medical_history:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please create medical history first.")
 
     new_treatment = TreatmentsOrm(
@@ -103,7 +103,7 @@ async def vaccination(request: Request, animal: animal_dependency):
 @vet_router.post("/new_vaccination/{animal_id}", status_code=HTTP_201_CREATED)
 async def create_vaccination(db: db_dependency, animal: animal_dependency, date: datetime = Form(...), description: str = Form(...)):
     animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
-    if not medical_history:
+    if not animal_medical_history:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please create medical history first.")
 
     new_vaccination = VaccinationsOrm(
