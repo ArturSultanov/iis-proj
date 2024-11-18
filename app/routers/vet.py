@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, HTTPException, status
 from fastapi.params import Depends
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED
 from datetime import datetime, timezone
@@ -69,15 +69,14 @@ async def treatment(request: Request, animal: animal_dependency):
 
 
 @vet_router.post("/new_treatment/{animal_id}", status_code=HTTP_201_CREATED)
-async def create_treatment(db: db_dependency, animal: animal_dependency, date: str = Form(...), description: str = Form(...)):
-    treatment_date = datetime.strptime(date, "%Y-%m-%d")
+async def create_treatment(db: db_dependency, animal: animal_dependency, date: datetime = Form(...), description: str = Form(...)):
     animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
     if not medical_history:
-        return {"message": "Medical history does not exist. Please create medical history first."}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please create medical history first.")
 
     new_treatment = TreatmentsOrm(
         medical_history_id=animal_medical_history.id,
-        date=treatment_date,
+        date=date,
         description=description
     )
     db.add(new_treatment)
@@ -91,15 +90,14 @@ async def vaccination(request: Request, animal: animal_dependency):
 
 
 @vet_router.post("/new_vaccination/{animal_id}", status_code=HTTP_201_CREATED)
-async def create_vaccination(db: db_dependency, animal: animal_dependency, date: str = Form(...), description: str = Form(...)):
-    vaccination_date = datetime.strptime(date, "%Y-%m-%d")
+async def create_vaccination(db: db_dependency, animal: animal_dependency, date: datetime = Form(...), description: str = Form(...)):
     animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
     if not medical_history:
-        return {"message": "Medical history does not exist. Please create medical history first."}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Please create medical history first.")
 
     new_vaccination = VaccinationsOrm(
         medical_history_id=animal_medical_history.id,
-        date=vaccination_date,
+        date=date,
         description=description
     )
     db.add(new_vaccination)
