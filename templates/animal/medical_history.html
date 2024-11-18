@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Medical History</title>
+    <link rel="stylesheet" href="../../static/css/main.css">
+    <link rel="stylesheet" href="../../static/css/vertical_forms.css">
+    <link rel="stylesheet" href="../../static/css/horizontal_forms.css">
+</head>
+<body>
+    <h1>New Medical History For Animal: {{ animal.name }}</h1>
+    <div class="form">
+        <form id="history_form">
+            <div class="container">
+                <label for="description">Description:</label><br>
+                <textarea name="description" id="description" required></textarea><br><br>
+            </div>
+            <div class="container">
+                <button type="submit">Create Medical History</button>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>
+    </div>
+
+    <script>
+        const animalId = {{ animal_id }};
+        const historyForm = document.getElementById('history_form');
+
+        historyForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(historyForm);
+
+            const response = await fetch(`/vet/new_medical_history/${animalId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                window.location.href = `/animals/${animalId}/profile`;
+            } else {
+                alert("Error: Failed to create medical history.");
+            }
+        });
+    </script>
+</body>
+</html>

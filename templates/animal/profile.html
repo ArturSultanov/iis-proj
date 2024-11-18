@@ -38,11 +38,17 @@
             <button class="staff-btn create-request-btn" id="create-request">Create Vet Request</button>
         </div>
         {% endif %}
+        {% if user and user.is_vet %}
+            <div class="animal-profile-vet-section">
+                <button class="vet-btn history-btn" id="create-history">Create Medical History</button>
+                <button class="vet-btn treatment-btn" id="add-treatment">Prescribe Treatment</button>
+                <button class="vet-btn vaccination-btn" id="add-vaccination">Schedule vaccination</button>
+            </div>
+        {% endif %}
     </div>
 </body>
 
 {% if user %}
-{% if user.is_staff %}
 <script>
     const animalId = {{ animal.id }};
 
@@ -88,8 +94,23 @@
                 });
         }
     });
+
+    const historyBtn = document.getElementById('create-history');
+    const treatmentBtn = document.getElementById('add-treatment');
+    const vaccinationBtn = document.getElementById('add-vaccination');
+
+    historyBtn.addEventListener('click', () => {
+        window.location.href = `/vet/new_medical_history/${animalId}`;
+    });
+
+    treatmentBtn.addEventListener('click', () => {
+        window.location.href = `/vet/new_treatment/${animalId}`;
+    });
+
+    vaccinationBtn.addEventListener('click', () => {
+        window.location.href = `/vet/new_vaccination/${animalId}`;
+    });
 </script>
-{% endif %}
 {% endif %}
 
 </html>
