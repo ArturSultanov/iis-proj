@@ -1,0 +1,87 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: var(--fit-darker-background); /* Green background */
+    color: var(--fit-text);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+/* Left Section: Back Button */
+.header-left {
+    display: flex;
+    /*align-items: center;*/
+    justify-content: left;
+    width: 100px;
+}
+
+.header-back-btn {
+    /*background-color: #3e8e41; !* Darker green for the button *!*/
+    /*color: white;*/
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.header-back-btn:hover {
+    background-color: var(); /* Even darker green on hover */
+}
+
+/* Center Section: Title */
+.header-center h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+/* Right Section: Dropdown Menu */
+.header-right {
+    position: relative;
+    display: flex;
+    justify-content: right;
+    width: 100px;
+}
+
+.header-dropdown-menu {
+    display: inline-block;
+}
+
+.header-dropdown-btn {
+    border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+/* Dropdown Content */
+.header-dropdown-content {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%; /* Below the button */
+    right: 0; /* Aligns with the button */
+    background-color: white; /* White background */
+    min-width: 150px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.header-dropdown-content .link {
+    display: block;
+    padding: 10px;
+    color: var(--fit-white);
+    text-decoration: none; /* Remove underline */
+}
+
+/* Show Dropdown on Hover */
+.header-dropdown-menu:hover .header-dropdown-content {
+    display: block;
+}

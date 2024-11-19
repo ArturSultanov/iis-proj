@@ -1,35 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Profile</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<body>
-    <h1>User Profile</h1>
+{% set title='user profile' %}
+{% extends 'base.html' %}
+{% block content %}
     <p>Welcome, <span id="name">{{ user.name }}</span></p>
     <p>Your role: <span id="role">{{ user.role }}</span></p>
-    {% if user.is_admin %}
-    <a href="/admin/dashboard" class="link" style="min-width: 200px">Admin dashboard</a><br>
-    {% endif %}
-    {% if user.is_staff %}
-    <a href="/staff/dashboard" class="link" style="min-width: 200px">Staff dashboard</a><br>
-    {% endif %}
-    {% if user.is_vet %}
-    <a href="/vet/dashboard" class="link" style="min-width: 200px">Vet dashboard</a><br>
-    {% endif %}
-    {% if user.is_volunteer %}
-    <a href="/volunteer/dashboard" class="link" style="min-width: 200px">Volunteer dashboard</a><br>
-    {% endif %}
+
+    <a href=""
 
     {% if user.is_registered %}
     <a href="/user/volunteer_application" class="link" style="min-width: 200px; background-color: lightgreen">Volunteer application</a><br>
     {% endif %}
 
-    <button id="logout">Logout</button><br>
-    <button id="logout_all">Logout All</button>
-    <label for="keep_this">Keep this session: </label>
-    <input type="checkbox" id="keep_this" checked>
-</body>
-<script src="../../static/logout.js"></script>
-</html>
+    {% include 'snippets/logout.html' %}
+{% endblock %}

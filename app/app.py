@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK
+from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER
 
 from starlette.middleware.cors import CORSMiddleware
 
@@ -101,3 +101,16 @@ async def animal_profile(request: Request, animal_id: int, db: db_dependency, se
                                           "user": session.user,
                                           "animal": animal
                                       })
+
+@app.get("/dashboard")
+async def dashboard(request: Request, session: session_dependency):
+    if not session.user:
+        return RedirectResponse(url="/")
+    if session.user.is_admin:
+        return RedirectResponse(url="/admin/dashboard")
+    if session.user.is_staff:
+        return RedirectResponse(url="/staff/dashboard")
+    if session.user.is_vet:
+        return RedirectResponse(url="/vet/dashboard")
+    if session.user.is_volunteer:
+        return RedirectResponse(url="/volunteer/dashboard")

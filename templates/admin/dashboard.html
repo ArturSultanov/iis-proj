@@ -9,15 +9,10 @@
 <h1>Admin dashboard</h1>
 <p>Welcome, <span id="name">{{ admin.name }}</span></p>
 <p>Your username: <span id="role">{{ admin.username }}</span></p>
-<a href="/admin/users" class="link">Users</a>
-{#<a href="/admin/animals" class="link">Animals</a>#}
-{#<a href="/admin/adoptions" class="link">Adoptions</a>#}
-<br>
-<button id="terminate_all_sessions">terminate all users' sessions</button>
-<br>
-<button id="logout">Logout</button>
+<a href="/admin/users" class="link">Users</a><br>
+<button id="terminate_all_sessions">terminate all users' sessions</button><br>
+{% include 'snippets/logout.html' %}
 </body>
-<script src="../../static/logout.js"></script>
 <script>
     document.getElementById('terminate_all_sessions').addEventListener('click', function () {
         fetch('/admin/sessions', {
