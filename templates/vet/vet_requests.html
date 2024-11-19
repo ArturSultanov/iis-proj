@@ -27,6 +27,11 @@
 </head>
 <body>
     <h1>Vet Requests</h1>
+    {% if animal_name %}
+        <p>Showing Requests For Animal: {{ animal_name }}</p>
+    {% endif %}
+    <button class="back-button" onclick="window.history.back();">Back</button>
+
     <div>
         <label for="status">Filter by status:</label>
         <select name="status" id="status">

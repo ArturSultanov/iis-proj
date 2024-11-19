@@ -136,3 +136,29 @@ async def create_medical_history(db: db_dependency, animal: animal_dependency, d
     db.add(new_medical_history)
     db.commit()
     return {"message": "Medical history created successfully"}
+
+
+@vet_router.get("/medical_history_profile/{animal_id}", status_code=HTTP_200_OK)
+async def get_medical_history(request: Request, animal: animal_dependency, db: db_dependency):
+    animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
+    return templates.TemplateResponse("vet/medical_history_profile.html", {
+        "request": request,
+        "animal": animal,
+        "medical_history": animal_medical_history
+    })
+
+@vet_router.get("/requests/{animal_id}", status_code=HTTP_200_OK)
+async def get_vet_requests(request: Request, db: db_dependency, animal: animal_dependency,vet: vet_dependency, status: str = None):
+    query = db.query(VetRequestOrm).filter(VetRequestOrm.animal_id == animal.id)
+    if status:
+        query = query.filter(VetRequestOrm.status == VetRequestStatus[status])
+
+    vet_requests = query.all()
+
+    return templates.TemplateResponse("vet/vet_requests.html", {
+        "request": request,
+        "vet": vet,
+        "vet_requests": vet_requests,
+        "status": status,
+        "animal_name": animal.name
+    })

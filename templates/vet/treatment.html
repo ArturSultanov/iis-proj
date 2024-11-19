@@ -25,7 +25,7 @@
         </form>
     </div>
     <div class="container">
-        <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>
+        <a href="/vet/medical_history_profile/{{ animal.id }}" class="link" style="padding-top: 10px">Back to Animal Medical Hitory</a>
     </div>
 
     <script>
@@ -43,8 +43,10 @@
             });
 
             if (response.ok) {
-                window.location.href = `/animals/${animalId}/profile`;
-            } else {
+                window.location.href = `/vet/medical_history_profile/${animalId}`;}
+            else if (response.status === 404) {
+                    alert("Medical history not found. Please create it first.");}
+            else {
                 alert("Error: Could not submit treatment.");
             }
         });
