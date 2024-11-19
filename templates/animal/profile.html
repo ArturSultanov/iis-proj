@@ -49,6 +49,11 @@
             <button class="staff-btn rsv-btn" id="reserve-animal">Reserve walk</button>
         </div>
         {% endif %}
+        {% if user and user.is_vet %}
+            <div class="animal-profile-vet-section">
+                <button class="vet-btn show-history-btn" id="show-history">Show Medical History</button>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
 
@@ -63,5 +68,74 @@
         {% if user.is_volunteer %}
             <script src="{{ url_for('static', path='js/animal/animal_profile_volunteer.js') }}"></script>
         {% endif %}
+        {% if user.is_vet %}
+            <script src="{{ url_for('static', path='js/animal/animal_profile_volunteer.js') }}"></script>
+        {% endif %}
     {% endif %}
 {% endblock %}
+
+{##}
+{##}
+{#{% if user %}#}
+{#{% if user.is_staff %}#}
+{#<script>#}
+{#    const animalId = {{ animal.id }};#}
+{##}
+{#    const editBtn = document.getElementById('edit-animal-profile');#}
+{#    const hideBtn = document.getElementById('hide-animal');#}
+{#    const deleteBtn = document.getElementById('delete-animal');#}
+{#    const createRequestBtn = document.getElementById('create-request');#}
+{##}
+{#    editBtn.addEventListener('click', () => {#}
+{#        window.location.href = `/staff/animals/${animalId}/edit`;#}
+{#    });#}
+{##}
+{#    createRequestBtn.addEventListener('click', () => {#}
+{#        window.location.href = `/staff/new_request/${animalId}`;#}
+{#    });#}
+{##}
+{#    hideBtn.addEventListener('click', () => {#}
+{#        const hidden = {{ animal.hidden|string|lower }};#}
+{#        fetch(`/staff/animals/${animalId}/hide?hidden=${!hidden}`, {#}
+{#            method: 'PATCH',#}
+{#        })#}
+{#            .then(response => {#}
+{#                if (response.ok) {#}
+{#                    window.location.reload();#}
+{#                } else {#}
+{#                    alert('Failed to hide the animal');#}
+{#                }#}
+{#            });#}
+{#    });#}
+{##}
+{#    deleteBtn.addEventListener('click', () => {#}
+{#        // ask for confirmation#}
+{#        if (confirm('Are you sure you want to delete this animal?')) {#}
+{#            fetch(`/staff/animals/${animalId}`, {#}
+{#                method: 'DELETE',#}
+{#            })#}
+{#                .then(response => {#}
+{#                    if (response.ok) {#}
+{#                        window.location.href = '/animals';#}
+{#                    } else {#}
+{#                        alert('Failed to delete the animal');#}
+{#                    }#}
+{#                });#}
+{#        }#}
+{#    });#}
+{#</script>#}
+{#{% endif %}#}
+{##}
+{#{% if user.is_vet %}#}
+{#<script>#}
+{#    const animalId = {{ animal.id }};#}
+{#    const showHistoryBtn = document.getElementById('show-history');#}
+{##}
+{#    showHistoryBtn.addEventListener('click', () => {#}
+{#        window.location.href = `/vet/medical_history_profile/${animalId}`;#}
+{#    });#}
+{#</script>#}
+{##}
+{#{% endif %}#}
+{#{% endif %}#}
+{#</html>#}
