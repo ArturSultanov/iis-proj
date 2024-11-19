@@ -10,8 +10,11 @@
     --fit-red: #e4002b;
     --fit-background: #f0f0f0;
     --fit-darker-background: #f3f7f6;
+    --fit-dark-background: #424242;
     --fit-text: #125ea6;
     --fit-light-text: #6a7a86;
+    --fit-light-gray: #6a7a86;
+    --fit-gray: #424242;
     --fit-black: #000;
     --fit-white: #fff;
 }
@@ -26,6 +29,10 @@ body {
     margin: 0 20px 20px;
 }
 
+h1 {
+    color: var(--fit-lightblue);
+}
+
 p {
     font-size: 1.2em;
 }
@@ -35,7 +42,7 @@ span {
 }
 
 button {
-    background-color: var(--fit-blue);
+    background-color: var(--fit-lightblue);
     color: var(--fit-white);
     display: inline-block;
     margin: 10px;
@@ -45,19 +52,18 @@ button {
     font-size: 1em;
     cursor: pointer;
     border: none;
+    box-sizing: border-box;
+    flex: 1;
 }
 
-#terminate_all_sessions {
-    background-color: #e4002b;
-}
-
-#terminate_all_sessions:hover {
-    background-color: #bb0022;
+button:hover {
+    background-color: var(--fit-blue);
+    transition: background-color 0.4s;
 }
 
 .link {
-    background-color: #e0e0e0;
-    color: #00a9e0;
+    background-color: var(--fit-light-gray);
+    color: var(--fit-white);
     display: inline-block;
     margin: 10px;
     padding: 10px 20px;
@@ -68,8 +74,22 @@ button {
 }
 
 .link:hover {
-    background-color: #d0d0d0;
+    background-color: var(--fit-gray);
     transition: background-color 0.4s;
+}
+
+.content-link {
+    min-width: 200px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+    min-width: 600px;
+    max-width: 1200px;
 }
 
 .container {
@@ -79,9 +99,11 @@ button {
 }
 
 .logout {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
+    background-color: var(--fit-red);
+}
+
+.logout:hover {
+    background-color: #bb0022;
 }
 
 input[type="text"],

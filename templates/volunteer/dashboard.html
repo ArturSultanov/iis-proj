@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Volunteer Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<body>
-<h1>Volunteer Dashboard</h1>
-<p>Welcome, <span id="name">{{ staff.name }}</span></p>
-<a href="/animals" class="link" style="min-width: 200px">Animals</a>
-<a href="/volunteer/history" class="link" style="min-width: 200px">Walks history</a>
-</body>
-</html>
+{% set title='volunteer dashboard' %}
+{% extends 'base.html' %}
+{% block content %}
+    <a href="/animals" class="link content-link">Animals</a>
+    <a href="/volunteer/requests" class="link content-link">Volunteer Requests</a>
+    <a href="/volunteer/history" class="link content-link">Walks history</a>
+{% endblock %}

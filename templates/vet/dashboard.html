@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vet Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<body>
-<h1>Vet Dashboard</h1>
-</body>
-</html>
+{% set title='vet dashboard' %}
+{% extends 'base.html' %}
+{% block content %}
+    <a href="/vet/requests" class="link">Vet Requests</a>
+    <a href="/animals" class="link">Animals</a>
+{% endblock %}

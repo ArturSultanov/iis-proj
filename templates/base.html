@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+{% with title=title %}
+	{% include 'snippets/header.html' %}
+{% endwith %}
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+{% include 'snippets/footer.html' %}
+</body>
+<!-- Scripts -->
+<!-- Default scripts -->
+{% if user %}
+<script src="{{ url_for('static', path='logout.js') }}"></script>
+{% endif %}
+<!-- Custom scripts -->
+{% block scripts %}
+{% endblock %}
+<!-- End Scripts -->
+</html>

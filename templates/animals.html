@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Animals</title>
-    <link rel="stylesheet" href="../static/css/main.css">
-    <link rel="stylesheet" href="../static/css/table.css">
-    <link rel="stylesheet" href="../static/css/horizontal_forms.css">
-</head>
-<body>
-<h1>Animals</h1>
+{% set title='animals' %}
+{% extends 'base.html' %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+{% endblock %}
+{% block content %}
 {% if user != None %}
 {% if user.is_staff and page == 1 %}
 <form class="horizontal-form">
@@ -74,7 +70,8 @@
     {% endif %}
 </div>
 {% endif %}
-</body>
+{% endblock %}
+{% block scripts %}
 {% if user != None %}
 {% if user.is_staff %}
 <script>
@@ -121,4 +118,4 @@
         }
     });
 </script>
-</html>
+{% endblock %}
