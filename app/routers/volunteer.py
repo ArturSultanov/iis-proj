@@ -77,6 +77,9 @@ async def cancel_walk(
     db: db_dependency,
     volunteer: volunteer_dependency,
 ):
+    """
+    Cancel the walk for the volunteer
+    """
     walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id, WalksOrm.user_id == volunteer.id).first()
     if not walk:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk not found.")
@@ -140,7 +143,8 @@ async def reserve_walks(
             if curr - prev <= max_gap:  # Continuous
                 current_session.append(curr)
             else:  # Gap detected
-                grouped_sessions.append(current_session)
+                if current_session:
+                    grouped_sessions.append(current_session)
                 current_session = [curr]
 
         if current_session:
@@ -207,11 +211,7 @@ async def get_scheduled_walks(
         end_time = start_time + timedelta(minutes=walk.duration)
 
         # Calculate the number of full hours
-        total_hours = int((end_time - start_time).total_seconds() // 3600)
-        remaining_minutes = int((end_time - start_time).total_seconds() % 3600)
-
-        # If there are remaining minutes, add an extra slot
-        num_slots = total_hours + (1 if remaining_minutes > 0 else 0)
+        num_slots = int((end_time - start_time).total_seconds() // 3600)
 
         # Generate slots for each hour
         for hour_offset in range(num_slots):
