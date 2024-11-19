@@ -21,6 +21,7 @@ class Role(enum.Enum):
     def get_roles(cls) -> list[Self]:
         return [role for role in cls]
 
+
 class UsersOrm(Base):
     __tablename__ = 'users'
 
@@ -141,6 +142,15 @@ class AnimalsOrm(Base):
     vet_requests: Mapped[list["VetRequestOrm"]] = (
         relationship("VetRequestOrm", back_populates="animal", cascade="all, delete"))
 
+
+class WalkStatus(enum.Enum):
+    pending = 'pending'
+    accepted = 'accepted'
+    rejected = 'rejected'
+    finished = 'finished'
+    cancelled = 'cancelled'
+
+
 class WalksOrm(Base):
     __tablename__ = 'walks'
 
@@ -150,7 +160,7 @@ class WalksOrm(Base):
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)
     location: Mapped[Str256] = mapped_column()
-    status: Mapped[AdoptionStatus] = mapped_column(default=AdoptionStatus.pending)
+    status: Mapped[WalkStatus] = mapped_column(default=WalkStatus.pending)
 
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="scheduled_walks")
 
