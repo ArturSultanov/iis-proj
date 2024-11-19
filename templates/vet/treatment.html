@@ -20,6 +20,10 @@
                 <input type="date" id="date" name="date" required><br><br>
             </div>
             <div class="container">
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required><br><br>
+            </div>
+            <div class="container">
                 <button type="submit">Add Treatment</button>
             </div>
         </form>
@@ -50,6 +54,16 @@
                 alert("Error: Could not submit treatment.");
             }
         });
+
+        const now = new Date();
+        const today = now.toISOString().split('T')[0];
+        const currentTime = now.toTimeString().slice(0, 5);
+
+        const dateInput = document.getElementById('date');
+        const timeInput = document.getElementById('time');
+        dateInput.value = today;
+        dateInput.min = today;
+        timeInput.value = currentTime;
     </script>
 </body>
 </html>

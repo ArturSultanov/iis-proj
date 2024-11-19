@@ -33,7 +33,7 @@
             {% for treatment in medical_history.treatments %}
                 <tr>
                     <td>{{ treatment.description }}</td>
-                    <td>({{ treatment.date }})</td>
+                    <td>{{ treatment.date }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -51,7 +51,7 @@
             {% for vaccination in medical_history.vaccinations %}
                 <tr>
                     <td>{{ vaccination.description }}</td>
-                    <td>({{ vaccination.date }})</td>
+                    <td>{{ vaccination.date }}</td>
                 </tr>
             {% endfor %}
         </tbody>
