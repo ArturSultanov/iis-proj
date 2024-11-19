@@ -5,14 +5,14 @@ from uuid import UUID, uuid4
 from fastapi import Depends, HTTPException, Request
 from fastapi.params import Cookie
 from pydantic import BaseModel
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_303_SEE_OTHER, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_303_SEE_OTHER, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from starlette.templating import Jinja2Templates
 
 from app.config import settings
 from app.database import UsersOrm, Role, db_dependency, SessionsOrm
 from typing import Annotated as typingAnnotated
 
-from app.database.models import ApplicationStatus
+from app.database.models import ApplicationStatus, AnimalsOrm
 
 # This is default session duration
 session_duration = timedelta(hours=1)
@@ -134,6 +134,17 @@ def application_status_to_int(status: ApplicationStatus) -> int:
     elif status == ApplicationStatus.rejected:
         return 2
 
+
+# Dependency to get an animal by id
+def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
+    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
+    if not animal:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found")
+    return animal
+
+
+#
+animal_dependency = typingAnnotated[AnimalsOrm, Depends(get_animal)]
 # This is a dependency that will be used to get the admin user from the session
 admin_dependency = typingAnnotated[UsersOrm, Depends(get_admin)]
 # This is a dependency that will be used to get the staff user from the session

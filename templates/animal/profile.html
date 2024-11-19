@@ -95,15 +95,14 @@
             }
         });
     </script>
-
-    {% elif user.is_volunteer %}
+    {% endif %}
+    {% if user.is_volunteer %}
     <script>
-        const animalId = {{ animal.id }};
 
         const reserveBtn = document.getElementById('reserve-animal');
 
         reserveBtn.addEventListener('click', () => {
-            window.location.href = `/volunteer/animals/${animalId}/calendar`;
+            window.location.href = `/volunteer/animals/{{ animal.id }}/calendar`;
         });
     </script>
     {% endif %}

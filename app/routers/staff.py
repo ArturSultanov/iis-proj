@@ -9,7 +9,7 @@ from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, 
 from app.database import db_dependency, AnimalsOrm
 from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm, \
     WalkStatus, WalksOrm
-from app.utils import staff_dependency, templates, get_staff, application_status_to_int
+from app.utils import staff_dependency, templates, get_staff, application_status_to_int, animal_dependency
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session, joinedload
 
@@ -35,14 +35,14 @@ class AnimalForm(BaseModel):
             "photo": self.photo.file.read() if self.photo else None
         }
 
-# Dependency to get an animal by id
-def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
-    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
-    if not animal:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found")
-    return animal
-
-animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
+# # Dependency to get an animal by id
+# def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
+#     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
+#     if not animal:
+#         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found")
+#     return animal
+#
+# animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
 @staff_router.get("/dashboard", status_code=HTTP_200_OK)
 async def staff_dashboard(request: Request, staff: staff_dependency):

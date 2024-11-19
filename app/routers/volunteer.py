@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
-from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
-from app.database import db_dependency, WalksOrm, AnimalsOrm, WalkStatus
-from app.utils import get_volunteer, volunteer_dependency, templates
+from app.database import db_dependency, WalksOrm, AnimalsOrm, WalkStatus, AnimalStatus
+from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency
 from pydantic import BaseModel
 
 
@@ -32,9 +32,9 @@ async def staff_dashboard(request: Request, volunteer: volunteer_dependency):
 
 @volunteer_router.get("/history", status_code=HTTP_200_OK)
 async def volunteer_history(
-    request: Request,
-    volunteer: volunteer_dependency,
-    db: db_dependency,
+        request: Request,
+        volunteer: volunteer_dependency,
+        db: db_dependency,
 ):
     """
     Returns the history of the walks for the current volunteer
@@ -52,8 +52,8 @@ async def volunteer_history(
 
     for walk in walks:
         can_cancel = (
-            walk.status in [WalkStatus.pending, WalkStatus.accepted]
-            and walk.date.date() > today.date()
+                walk.status in [WalkStatus.pending, WalkStatus.accepted]
+                and walk.date.date() > today.date()
         )
         walk_data.append({
             "id": walk.id,
@@ -73,9 +73,9 @@ async def volunteer_history(
 
 @volunteer_router.delete("/walks/{walk_id}/cancel", status_code=HTTP_200_OK)
 async def cancel_walk(
-    walk_id: int,
-    db: db_dependency,
-    volunteer: volunteer_dependency,
+        walk_id: int,
+        db: db_dependency,
+        volunteer: volunteer_dependency,
 ):
     """
     Cancel the walk for the volunteer
@@ -101,9 +101,9 @@ async def cancel_walk(
 
 @volunteer_router.get("/animals/{animal_id}/calendar", status_code=HTTP_200_OK)
 async def reserve_calendar(
-    request: Request,
-    animal_id: int,
-    db: db_dependency,
+        request: Request,
+        animal_id: int,
+        db: db_dependency,
 ):
     """
     Displays the calendar interface for reserving walks for a specific animal.
@@ -123,10 +123,10 @@ async def reserve_calendar(
 
 @volunteer_router.post("/animals/{animal_id}/reserve", status_code=HTTP_201_CREATED)
 async def reserve_walks(
-    animal_id: int,
-    slots: List[datetime],
-    db: db_dependency,
-    volunteer: volunteer_dependency,
+        animal_id: int,
+        slots: List[datetime],
+        db: db_dependency,
+        volunteer: volunteer_dependency,
 ):
     """
     The function to reserve a walk slots for specific animal by a volunteer.
@@ -151,6 +151,8 @@ async def reserve_walks(
             grouped_sessions.append(current_session)
 
         return grouped_sessions
+
+    # TODO: check if animal available + check available slots
 
     if not slots:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="No slots selected.")
@@ -182,27 +184,20 @@ async def reserve_walks(
 
 @volunteer_router.get("/animals/{animal_id}/scheduled-walks", status_code=HTTP_200_OK)
 async def get_scheduled_walks(
-    animal_id: int,
-    db: db_dependency,
-    start_date: datetime = Query(...),
-    end_date: datetime = Query(...),
+        animal: animal_dependency,
+        start_date: datetime = Query(...),
+        end_date: datetime = Query(...),
 ):
     """
     Fetches all scheduled walks for a specific animal within a given date range.
     """
 
-    # Fetch scheduled walks within the given date range
-    scheduled_walks = (
-        db.query(WalksOrm)
-        .filter(
-            WalksOrm.animal_id == animal_id,
-            WalksOrm.date >= start_date,
-            WalksOrm.date < end_date,
-            WalksOrm.status.in_([WalkStatus.pending, WalkStatus.accepted, WalkStatus.finished])
-        )
-        .all()
-    )
+    if animal.status not in [AnimalStatus.available] or animal.hidden:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is available.")
 
+    scheduled_walks = filter(
+        lambda x: start_date <= x.date < end_date and x.status in [WalkStatus.pending, WalkStatus.accepted,
+                                                                   WalkStatus.finished], animal.scheduled_walks)
     # Generate scheduled slots
     scheduled_slots = []
 
