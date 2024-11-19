@@ -1,16 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Reserve Walks for {{ animal.name }}</title>
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/calendar.css">
-</head>
-<body>
+{% set title='Reserve Walks' %}
+
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/calendar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}">
+{% endblock %}
+
+{% block content %}
     <header>
         <h1>Reserve Walks for {{ animal.name }}</h1>
-        <a href="/volunteer/dashboard" class="link">Back to dashboard</a>
-        <a href="/animals/{{ animal.id }}/profile" class="link">Back to Animal Profile</a>
+        <div>
+            <a href="/volunteer/dashboard" class="link">Back to Dashboard</a>
+            <a href="/animals/{{ animal.id }}/profile" class="link">Back to Animal Profile</a>
+        </div>
     </header>
 
     <div class="calendar-controls">
@@ -25,7 +27,7 @@
                 <tr>
                     <th>Time</th>
                     {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                    <th>{{ day }}<br><span class="date-header"></span></th>
+                        <th>{{ day }}<br><span class="date-header"></span></th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -34,7 +36,7 @@
                 <tr>
                     <td>{{ "%02d:00" % hour }}</td>
                     {% for _ in range(7) %}
-                    <td class="time-slot" data-hour="{{ "%02d:00" % hour }}"></td>
+                        <td class="time-slot" data-hour="{{ "%02d:00" % hour }}"></td>
                     {% endfor %}
                 </tr>
                 {% endfor %}
@@ -42,198 +44,11 @@
         </table>
     </div>
     <button id="confirm">Confirm</button>
+{% endblock %}
 
+{% block scripts %}
     <script>
-        const animalId = {{ animal.id }};
-        let currentStartDate = new Date();
-        const selectedSlots = new Set();
-
-        /** Helper function to format date as 'YYYY-MM-DD' */
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = (`0${date.getMonth() + 1}`).slice(-2);
-            const day = (`0${date.getDate()}`).slice(-2);
-            return `${year}-${month}-${day}`;
-        };
-
-        /** Helper function to format datetime as 'YYYY-MM-DDTHH:MM:SS' */
-        const formatDateTime = (date) => {
-            const year = date.getFullYear();
-            const month = (`0${date.getMonth() + 1}`).slice(-2);
-            const day = (`0${date.getDate()}`).slice(-2);
-            const hour = (`0${date.getHours()}`).slice(-2);
-            const minute = (`0${date.getMinutes()}`).slice(-2);
-            const second = (`0${date.getSeconds()}`).slice(-2);
-            return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-        };
-
-        /** Helper function to get the start of the week (Monday) */
-        const getMonday = (date) => {
-            const day = date.getDay();
-            const diff = (day + 6) % 7;
-            return new Date(date.getFullYear(), date.getMonth(), date.getDate() - diff);
-        };
-
-        /** Function to update the calendar's week display */
-        /**
-        const updateWeekDates = (startDate) => {
-            const options = { month: "short", day: "numeric" };
-            const weekDates = Array.from({ length: 7 }, (_, i) => new Date(startDate.getTime() + i * 86400000));
-
-            // Update week date range display
-            const displayStartDate = weekDates[0].toLocaleDateString(undefined, options);
-            const displayEndDate = weekDates[6].toLocaleDateString(undefined, options);
-            document.getElementById("week-dates").textContent = `${displayStartDate} - ${displayEndDate}`;
-
-            // Update date headers
-            document.querySelectorAll('.date-header').forEach((header, index) => {
-                header.textContent = weekDates[index].toLocaleDateString(undefined, options);
-            });
-
-            // Attach the `data-date` attributes to the slots
-            document.querySelectorAll(".time-slot").forEach((slot, index) => {
-                const columnIndex = index % 7;
-                slot.dataset.date = formatDate(weekDates[columnIndex]);
-            });
-
-            // Fetch and render booked slots
-            fetchScheduledWalks(startDate);
-        };
-        */
-
-        const updateWeekDates = (startDate) => {
-            const options = { month: "short", day: "numeric" };
-            const weekDates = Array.from({ length: 7 }, (_, i) => new Date(startDate.getTime() + i * 86400000));
-
-            // Update week date range display
-            const displayStartDate = weekDates[0].toLocaleDateString(undefined, options);
-            const displayEndDate = weekDates[6].toLocaleDateString(undefined, options);
-            document.getElementById("week-dates").textContent = `${displayStartDate} - ${displayEndDate}`;
-
-            // Update date headers
-            document.querySelectorAll('.date-header').forEach((header, index) => {
-                header.textContent = weekDates[index].toLocaleDateString(undefined, options);
-            });
-
-            // Get current date and time
-            const now = new Date();
-
-            // Attach the `data-date` attributes to the slots and disable past slots
-            document.querySelectorAll(".time-slot, .disabled").forEach((slot, index) => {
-                const columnIndex = index % 7;
-                const rowIndex = Math.floor(index / 7);
-                const slotDate = weekDates[columnIndex];
-                const slotHour = 8 + rowIndex; // Assuming hours from 8:00
-
-                const slotDateTime = new Date(`${formatDate(slotDate)}T${(`0${slotHour}`).slice(-2)}:00`);
-
-                // Update data attributes
-                slot.dataset.date = formatDate(slotDate);
-                slot.dataset.hour = (`0${slotHour}`).slice(-2) + ':00';
-
-                // Disable past slots
-                if (slotDateTime <= now) {
-                    slot.classList.add('disabled');
-                    slot.classList.remove('time-slot', 'selected');
-                } else {
-                    slot.classList.remove('disabled');
-                    slot.classList.add('time-slot');
-                }
-            });
-
-            // Fetch and render booked slots
-            fetchScheduledWalks(startDate);
-        };
-
-
-        /** Function to fetch and render scheduled walks for a given week */
-        const fetchScheduledWalks = (startDate) => {
-            const endDate = new Date(startDate.getTime() + 7 * 86400000);
-
-            fetch(`/volunteer/animals/${animalId}/scheduled-walks?start_date=${formatDateTime(startDate)}&end_date=${formatDateTime(endDate)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const occupiedSlots = new Set(data.scheduled_slots.map(s => `${s.hour}|${s.date}`));
-
-                    // Update calendar with booked slots
-                    document.querySelectorAll(".time-slot").forEach(slot => {
-                        const slotKey = `${slot.dataset.hour}|${slot.dataset.date}`;
-                        slot.classList.remove("occupied", "selected");
-                        if (occupiedSlots.has(slotKey)) {
-                            slot.classList.add("occupied");
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching scheduled walks:', error);
-                });
-        };
-
-        /** Event handler for time slot clicks */
-        const handleSlotClick = (event) => {
-            const slot = event.target;
-            if (slot.classList.contains('time-slot') && !slot.classList.contains('occupied')) {
-                const key = `${slot.dataset.hour}|${slot.dataset.date}`;
-                if (selectedSlots.has(key)) {
-                    selectedSlots.delete(key);
-                    slot.classList.remove('selected');
-                } else {
-                    selectedSlots.add(key);
-                    slot.classList.add('selected');
-                }
-            }
-        };
-
-        /** Event handler for confirming reservation */
-        const confirmReservation = () => {
-            if (selectedSlots.size === 0) {
-                alert('No slots selected.');
-                return;
-            }
-
-            const slots = Array.from(selectedSlots).map(slotKey => {
-                const [hour, date] = slotKey.split('|');
-                return `${date}T${hour}:00`;
-            });
-
-            fetch(`/volunteer/animals/${animalId}/reserve`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(slots),
-            }).then(response => {
-                if (response.ok) {
-                    alert('Reservation successful!');
-                    window.location.href = `/volunteer/history`;
-                } else {
-                    response.json().then(data => {
-                        alert(`Failed to reserve walks: ${data.detail}`);
-                    });
-                }
-            });
-        };
-
-        /** Initialize the calendar */
-        const initializeCalendar = () => {
-            currentStartDate = getMonday(new Date());
-            updateWeekDates(currentStartDate);
-        };
-
-        /** Event listeners */
-        document.getElementById("prev-week").addEventListener("click", () => {
-            currentStartDate.setDate(currentStartDate.getDate() - 7);
-            updateWeekDates(currentStartDate);
-        });
-
-        document.getElementById("next-week").addEventListener("click", () => {
-            currentStartDate.setDate(currentStartDate.getDate() + 7);
-            updateWeekDates(currentStartDate);
-        });
-
-        document.addEventListener('click', handleSlotClick);
-        document.getElementById('confirm').addEventListener('click', confirmReservation);
-
-        // Start the calendar on page load
-        initializeCalendar();
+        const animalId = "{{ animal.id }}";
     </script>
-</body>
-</html>
+    <script src="{{ url_for('static', path='js/volunteer/reserve_walks.js') }}"></script>
+{% endblock %}

@@ -4,7 +4,7 @@ from typing import List
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
-from app.database import db_dependency, WalksOrm, AnimalsOrm, WalkStatus, AnimalStatus
+from app.database import db_dependency, WalksOrm, WalkStatus, AnimalStatus
 from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency
 from pydantic import BaseModel
 
@@ -102,15 +102,14 @@ async def cancel_walk(
 @volunteer_router.get("/animals/{animal_id}/calendar", status_code=HTTP_200_OK)
 async def reserve_calendar(
         request: Request,
-        animal_id: int,
-        db: db_dependency,
+        animal: animal_dependency,
 ):
     """
     Displays the calendar interface for reserving walks for a specific animal.
     """
-    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
-    if not animal:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found.")
+
+    if animal.status not in [AnimalStatus.available] or animal.hidden:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is available.")
 
     return templates.TemplateResponse(
         "volunteer/calendar.html",
@@ -123,7 +122,7 @@ async def reserve_calendar(
 
 @volunteer_router.post("/animals/{animal_id}/reserve", status_code=HTTP_201_CREATED)
 async def reserve_walks(
-        animal_id: int,
+        animal: animal_dependency,
         slots: List[datetime],
         db: db_dependency,
         volunteer: volunteer_dependency,
@@ -136,15 +135,14 @@ async def reserve_walks(
         """
         Helper function to group several slots into the session
         """
-        grouped_sessions = []
-        current_session = [slots[0]]
+        grouped_sessions: List[List[datetime]] = []
+        current_session: List[datetime] = [slots[0]]
 
         for prev, curr in zip(slots, slots[1:]):
             if curr - prev <= max_gap:  # Continuous
                 current_session.append(curr)
             else:  # Gap detected
-                if current_session:
-                    grouped_sessions.append(current_session)
+                grouped_sessions.append(current_session)
                 current_session = [curr]
 
         if current_session:
@@ -152,7 +150,8 @@ async def reserve_walks(
 
         return grouped_sessions
 
-    # TODO: check if animal available + check available slots
+    if animal.status not in [AnimalStatus.available] or animal.hidden:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is available.")
 
     if not slots:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="No slots selected.")
@@ -168,8 +167,20 @@ async def reserve_walks(
         end_time = session[-1] + timedelta(hours=1)  # Each slot represents one hour
         duration = int((end_time - start_time).total_seconds() / 60)  # Duration in minutes
 
+        # Check for existing walks at the same date
+        overlapping_walks = [
+            walk for walk in db.query(WalksOrm).filter(WalksOrm.animal_id == animal.id).all()
+            if walk.date <= end_time and (walk.date + timedelta(minutes=walk.duration)) >= start_time
+        ]
+
+        if overlapping_walks:
+            raise HTTPException(
+                status_code=HTTP_400_BAD_REQUEST,
+                detail=f"Requested time slots overlap with existing walks."
+            )
+
         new_walk = WalksOrm(
-            animal_id=animal_id,
+            animal_id=animal.id,
             user_id=volunteer.id,
             date=start_time,
             duration=duration,
