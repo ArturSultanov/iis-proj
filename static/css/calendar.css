@@ -36,3 +36,9 @@
     font-size: 1.2em;
     font-weight: bold;
 }
+
+.calendar .disabled {
+    background-color: #ffffc8;
+    cursor: not-allowed;
+}
+

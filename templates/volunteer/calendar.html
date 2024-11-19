@@ -9,7 +9,7 @@
 <body>
     <header>
         <h1>Reserve Walks for {{ animal.name }}</h1>
-        <a href="/animals/{{ animal.id }}" class="link">Back to Animal Profile</a>
+        <a href="/animals/{{ animal.id }}/profile" class="link">Back to Animal Profile</a>
     </header>
 
     <div class="calendar-controls">
@@ -74,6 +74,7 @@
         };
 
         /** Function to update the calendar's week display */
+        /**
         const updateWeekDates = (startDate) => {
             const options = { month: "short", day: "numeric" };
             const weekDates = Array.from({ length: 7 }, (_, i) => new Date(startDate.getTime() + i * 86400000));
@@ -97,6 +98,52 @@
             // Fetch and render booked slots
             fetchScheduledWalks(startDate);
         };
+        */
+
+        const updateWeekDates = (startDate) => {
+            const options = { month: "short", day: "numeric" };
+            const weekDates = Array.from({ length: 7 }, (_, i) => new Date(startDate.getTime() + i * 86400000));
+
+            // Update week date range display
+            const displayStartDate = weekDates[0].toLocaleDateString(undefined, options);
+            const displayEndDate = weekDates[6].toLocaleDateString(undefined, options);
+            document.getElementById("week-dates").textContent = `${displayStartDate} - ${displayEndDate}`;
+
+            // Update date headers
+            document.querySelectorAll('.date-header').forEach((header, index) => {
+                header.textContent = weekDates[index].toLocaleDateString(undefined, options);
+            });
+
+            // Get current date and time
+            const now = new Date();
+
+            // Attach the `data-date` attributes to the slots and disable past slots
+            document.querySelectorAll(".time-slot, .disabled").forEach((slot, index) => {
+                const columnIndex = index % 7;
+                const rowIndex = Math.floor(index / 7);
+                const slotDate = weekDates[columnIndex];
+                const slotHour = 8 + rowIndex; // Assuming hours from 8:00
+
+                const slotDateTime = new Date(`${formatDate(slotDate)}T${(`0${slotHour}`).slice(-2)}:00`);
+
+                // Update data attributes
+                slot.dataset.date = formatDate(slotDate);
+                slot.dataset.hour = (`0${slotHour}`).slice(-2) + ':00';
+
+                // Disable past slots
+                if (slotDateTime <= now) {
+                    slot.classList.add('disabled');
+                    slot.classList.remove('time-slot', 'selected');
+                } else {
+                    slot.classList.remove('disabled');
+                    slot.classList.add('time-slot');
+                }
+            });
+
+            // Fetch and render booked slots
+            fetchScheduledWalks(startDate);
+        };
+
 
         /** Function to fetch and render scheduled walks for a given week */
         const fetchScheduledWalks = (startDate) => {

@@ -193,7 +193,8 @@ async def get_scheduled_walks(
         .filter(
             WalksOrm.animal_id == animal_id,
             WalksOrm.date >= start_date,
-            WalksOrm.date < end_date
+            WalksOrm.date < end_date,
+            WalksOrm.status.in_([WalkStatus.pending, WalkStatus.accepted, WalkStatus.finished])
         )
         .all()
     )
