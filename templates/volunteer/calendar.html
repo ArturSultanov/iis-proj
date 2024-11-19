@@ -1,0 +1,182 @@
+<!-- templates/volunteer/calendar.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reserve Walks for {{ animal.name }}</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/calendar.css">
+</head>
+<body>
+    <header>
+        <h1>Reserve Walks for {{ animal.name }}</h1>
+        <a href="/animals/{{ animal.id }}" class="link">Back to Animal Profile</a>
+    </header>
+
+    <div class="calendar-controls">
+        <button id="prev-week">Previous Week</button>
+        <span id="week-dates"></span>
+        <button id="next-week">Next Week</button>
+    </div>
+
+    <div class="calendar">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                    <th>{{ day }} <br> <span class="date-header"></span></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for hour in range(8, 20) %}
+                <tr>
+                    <td>{{ "%02d:00" % hour }}</td>
+                    {% for _ in range(7) %}
+                    <td
+                        class="time-slot"
+                        data-hour="{{ "%02d:00" % hour }}"
+                        data-date=""
+                    ></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button id="confirm">Confirm</button>
+
+    <script>
+        const animalId = {{ animal.id }};
+        let currentStartDate = new Date();
+        const selectedSlots = new Set();
+
+        // Function to fetch and render scheduled walks for a given week
+        const fetchScheduledWalks = (startDate) => {
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 7);
+
+            fetch(`/volunteer/animals/${animalId}/scheduled-walks?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    const scheduledSlots = data.scheduled_slots;
+
+                    // Update calendar with booked slots
+                    document.querySelectorAll(".time-slot").forEach(slot => {
+                        const slotDate = slot.dataset.date;
+                        const slotHour = slot.dataset.hour;
+
+                        // Remove previous classes
+                        slot.classList.remove("occupied", "selected");
+
+                        // Check if slot is occupied
+                        if (scheduledSlots.some(s => s.hour === slotHour && s.date === slotDate)) {
+                            slot.classList.add("occupied");
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching scheduled walks:', error);
+                });
+        };
+
+        // Function to update the calendar's week display
+        const updateWeekDates = (startDate) => {
+            const weekDates = [];
+            const options = { month: "short", day: "numeric" };
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                weekDates.push(date.toISOString().split('T')[0]); // 'YYYY-MM-DD'
+            }
+
+            // Update the week dates display
+            const displayStartDate = new Date(weekDates[0]).toLocaleDateString(undefined, options);
+            const displayEndDate = new Date(weekDates[6]).toLocaleDateString(undefined, options);
+            document.getElementById("week-dates").textContent = `${displayStartDate} - ${displayEndDate}`;
+
+            // Update date headers in the table
+            const dateHeaders = document.querySelectorAll('.date-header');
+            dateHeaders.forEach((header, index) => {
+                const date = new Date(weekDates[index]);
+                header.textContent = date.toLocaleDateString(undefined, options);
+            });
+
+            // Attach the `data-date` attributes to the slots
+            document.querySelectorAll(".time-slot").forEach((slot, index) => {
+                const rowIndex = Math.floor(index / 7);
+                const columnIndex = index % 7;
+                slot.dataset.date = weekDates[columnIndex];
+            });
+
+            // Fetch and render booked slots for the updated week
+            fetchScheduledWalks(startDate);
+        };
+
+        // Event listeners for week navigation
+        document.getElementById("prev-week").addEventListener("click", () => {
+            currentStartDate.setDate(currentStartDate.getDate() - 7);
+            updateWeekDates(currentStartDate);
+        });
+
+        document.getElementById("next-week").addEventListener("click", () => {
+            currentStartDate.setDate(currentStartDate.getDate() + 7);
+            updateWeekDates(currentStartDate);
+        });
+
+        // Allow clicking and toggling time slots
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('time-slot') && !event.target.classList.contains('occupied')) {
+                const slot = event.target;
+                const key = `${slot.dataset.hour}|${slot.dataset.date}`;
+                if (selectedSlots.has(key)) {
+                    selectedSlots.delete(key);
+                    slot.classList.remove('selected');
+                } else {
+                    selectedSlots.add(key);
+                    slot.classList.add('selected');
+                }
+            }
+        });
+
+        // Send selected slots to the backend
+        document.getElementById('confirm').addEventListener('click', () => {
+            const slots = Array.from(selectedSlots).map(slotKey => {
+                const [hour, date] = slotKey.split('|');
+                // Create a proper ISO 8601 datetime string
+                return new Date(`${date}T${hour}`).toISOString();
+            });
+
+            if (slots.length === 0) {
+                alert('No slots selected.');
+                return;
+            }
+
+            fetch(`/volunteer/animals/${animalId}/reserve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(slots), // Send the formatted datetimes directly
+            }).then(response => {
+                if (response.ok) {
+                    alert('Reservation successful!');
+                    window.location.href = `/volunteer/history`;
+                } else {
+                    response.json().then(data => {
+                        alert(`Failed to reserve walks: ${data.detail}`);
+                    });
+                }
+            });
+        });
+
+        // Initialize the calendar
+        // Set the currentStartDate to the start of the current week (Monday)
+        const dayOfWeek = currentStartDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+        const daysToMonday = (dayOfWeek + 6) % 7; // Adjust so that Monday is 0
+        currentStartDate.setDate(currentStartDate.getDate() - daysToMonday);
+        updateWeekDates(currentStartDate);
+    </script>
+</body>
+</html>
