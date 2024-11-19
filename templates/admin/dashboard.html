@@ -1,18 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin dashboard</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<body>
-<h1>Admin dashboard</h1>
-<p>Welcome, <span id="name">{{ admin.name }}</span></p>
-<p>Your username: <span id="role">{{ admin.username }}</span></p>
-<a href="/admin/users" class="link">Users</a><br>
-<button id="terminate_all_sessions">terminate all users' sessions</button><br>
-{% include 'snippets/logout.html' %}
-</body>
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <title>Admin dashboard</title>#}
+{#    <link rel="stylesheet" href="../../static/css/main.css">#}
+{#</head>#}
+{#<body>#}
+{#<h1>Admin dashboard</h1>#}
+{#<p>Welcome, <span id="name">{{ admin.name }}</span></p>#}
+{#<p>Your username: <span id="role">{{ admin.username }}</span></p>#}
+{#<a href="/admin/users" class="link">Users</a><br>#}
+{#<button id="terminate_all_sessions">terminate all users' sessions</button><br>#}
+{#{% include 'snippets/logout.html' %}#}
+{#</body>#}
+{#<script>#}
+{#    document.getElementById('terminate_all_sessions').addEventListener('click', function () {#}
+{#        fetch('/admin/sessions', {#}
+{#            method: 'DELETE'#}
+{#        }).then(async response => {#}
+{#            if (response.ok) {#}
+{#                const data = await response.json();#}
+{#                alert(data.message);#}
+{#            } else {#}
+{#                alert('Error terminating sessions');#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#</script>#}
+{#</html>#}
+{% set title='admin dashboard' %}
+{% extends 'base.html' %}
+{% block content %}
+    <a href="/admin/users" class="link content-link">Users</a><br>
+    <!-- Other roles dashboard links -->
+    <a href="/vet/dashboard" class="link content-link">Vet Dashboard</a><br>
+    <a href="/volunteer/dashboard" class="link content-link">Volunteer Dashboard</a><br>
+    <a href="/staff/dashboard" class="link content-link">Staff Dashboard</a><br>
+    <button id="terminate_all_sessions">terminate all users' sessions</button><br>
+{% endblock %}
+{% block scripts %}
 <script>
     document.getElementById('terminate_all_sessions').addEventListener('click', function () {
         fetch('/admin/sessions', {
@@ -27,4 +53,4 @@
         });
     });
 </script>
-</html>
+{% endblock %}

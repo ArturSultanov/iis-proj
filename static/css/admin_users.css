@@ -1,0 +1,44 @@
+.error {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+.success {
+    color: green;
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+.you {
+    background-color: lightgreen;
+}
+
+table {
+    min-width: 800px;
+    border-collapse: collapse;
+}
+
+.column-id {
+    width: 5%;
+}
+
+.column-username {
+    width: 20%;
+}
+
+.column-name {
+    width: 20%;
+}
+
+.column-active {
+    width: 10%;
+}
+
+.column-role {
+    width: 10%;
+}
+
+.column-actions {
+    width: 10%;
+}

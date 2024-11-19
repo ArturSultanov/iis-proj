@@ -78,6 +78,10 @@ button:hover {
     transition: background-color 0.4s;
 }
 
+.content-link {
+    min-width: 200px;
+}
+
 .content {
     display: flex;
     flex-direction: column;

@@ -19,14 +19,9 @@
                 {% endif %}
                 {% if user %}
                 <a href="/user/profile" class="link">Profile</a>
-                <button id="logout" class="link logout" style="width: calc(100% - 20px)">Logout</button>
+                <button class="link logout logout-this" style="width: calc(100% - 20px)">Logout</button>
                 {% endif %}
             </div>
         </div>
     </div>
 </header>
-{% block scripts %}
-{% if user %}
-<script src="{{ url_for('static', path='logout.js') }}"></script>
-{% endif %}
-{% endblock %}

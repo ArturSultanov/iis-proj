@@ -143,13 +143,34 @@ async def volunteer_application_page(request: Request, session: session_dependen
 @user_router.post("/volunteer_application", status_code=status.HTTP_201_CREATED)
 async def volunteer_application(db: db_dependency, session: session_dependency, description: str = Form(...)):
     if not session:
-        return {"message": "Not logged in"}
+        return RedirectResponse(url="/user/signin")
     if not session.user.is_registered:
-        return {"message": "Already have other role"}
+        return RedirectResponse(url="/user/profile")
     application = session.user.volunteer_application
     if application:
-        return {"message": "Application already exists"}
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Application already submitted")
     application = VolunteerApplicationsOrm(user=session.user, date=datetime.now(), message=description)
     db.add(application)
     db.commit()
 
+@user_router.get("/change_password", status_code=status.HTTP_200_OK)
+async def change_password_page(request: Request, session: session_dependency):
+    if not session:
+        return RedirectResponse(url="/user/signin")
+    return templates.TemplateResponse("user/change_password.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user
+                                      })
+
+@user_router.post("/change_password", status_code=status.HTTP_200_OK)
+async def change_password(db: db_dependency, session: session_dependency, old_password: str = Form(...), new_password: str = Form(...), confirm_password: str = Form(...)):
+    if not session:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in")
+    if not verify_password(old_password, session.user.password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password")
+    if new_password != confirm_password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match")
+    session.user.password = hash_password(new_password)
+    db.commit()
+    return {"message": "Password changed"}

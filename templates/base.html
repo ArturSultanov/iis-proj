@@ -17,5 +17,13 @@
 </div>
 {% include 'snippets/footer.html' %}
 </body>
-{% block scripts %}{% endblock %}
+<!-- Scripts -->
+<!-- Default scripts -->
+{% if user %}
+<script src="{{ url_for('static', path='logout.js') }}"></script>
+{% endif %}
+<!-- Custom scripts -->
+{% block scripts %}
+{% endblock %}
+<!-- End Scripts -->
 </html>

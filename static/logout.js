@@ -1,7 +1,7 @@
-const logout_btn = document.getElementById('logout');
-const logout_all_btn = document.getElementById('logout_all');
+const logout_btns = document.getElementsByClassName('logout-this')
+const logout_all_btns = document.getElementsByClassName('logout-all')
 
-if (logout_btn) {
+for (const logout_btn of logout_btns) {
     logout_btn.addEventListener('click', async function() {
         const response = await fetch('/user/logout', {
             method: 'DELETE',
@@ -13,24 +13,15 @@ if (logout_btn) {
     });
 }
 
-if (logout_all_btn) {
+for (const logout_all_btn of logout_all_btns) {
+    const keep_logged_in = document.getElementById('keep_this').checked;
     logout_all_btn.addEventListener('click', async function() {
-
-        const keep_check = document.getElementById('keep_this');
-        var keep_this_session = false;
-        if (keep_check) {
-            keep_this_session = keep_check.checked;
-        }
-        const response = await fetch('/user/logout/all?keep_current='+keep_this_session, {
+        const response = await fetch(`/user/logout/all?keep_current=${keep_logged_in}`, {
             method: 'DELETE',
         });
 
         if (response.ok) {
-            if (!keep_this_session) {
-                window.location.href = '/';
-            } else {
-                alert('All other sessions have been logged out');
-            }
+            if (!keep_logged_in) window.location.href = '/';
         }
     });
 }

@@ -1,13 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signin</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-    <link rel="stylesheet" href="../../static/css/vertical_form.css">
-</head>
-<body>
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+{#    <title>Signin</title>#}
+{#    <link rel="stylesheet" href="../../static/css/main.css">#}
+{#    <link rel="stylesheet" href="../../static/css/vertical_form.css">#}
+{#</head>#}
+{#<body>#}
+{#    <h1>Login</h1>#}
+{#    <form id="loginForm" class="vertical-form">#}
+{#        <label for="username">Username:</label>#}
+{#        <input type="text" id="username" name="username" required><br>#}
+{##}
+{#        <label for="password">Password:</label>#}
+{#        <input type="password" id="password" name="password" required><br>#}
+{#        <div class="error-output" id="error"></div><br>#}
+{##}
+{#        <button type="submit">Login</button>#}
+{#    </form>#}
+{#<script src="../../static/login.js"></script>#}
+{#</body>#}
+{#</html>#}
+{##}
+{% set title='signin' %}
+{% extends 'base.html' %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+{% endblock %}
+{% block content %}
     <h1>Login</h1>
     <form id="loginForm" class="vertical-form">
         <label for="username">Username:</label>
@@ -19,6 +40,5 @@
 
         <button type="submit">Login</button>
     </form>
-<script src="../../static/login.js"></script>
-</body>
-</html>
+<script src="{{ url_for('static', path='login.js') }}"></script>
+{% endblock %}

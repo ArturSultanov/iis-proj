@@ -4,10 +4,11 @@
     <p>Welcome, <span id="name">{{ user.name }}</span></p>
     <p>Your role: <span id="role">{{ user.role }}</span></p>
 
-    <a href=""
+    <a href="/dashboard" class="link content-link">Dashboard</a><br>
+    <a href="/user/change_password" class="link content-link">Change password</a><br>
 
     {% if user.is_registered %}
-    <a href="/user/volunteer_application" class="link" style="min-width: 200px; background-color: lightgreen">Volunteer application</a><br>
+    <a href="/user/volunteer_application" class="link content-link" style="background-color: lightgreen">Volunteer application</a><br>
     {% endif %}
 
     {% include 'snippets/logout.html' %}
