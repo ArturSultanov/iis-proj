@@ -34,6 +34,9 @@
             {% endif %}
             <button class="staff-btn del-btn" id="delete-animal">Delete</button>
         </div>
+        <div>
+            <button class="staff-btn create-request-btn" id="create-request">Create Vet Request</button>
+        </div>
         {% endif %}
 
         {% if user and user.is_volunteer %}
@@ -52,9 +55,14 @@
         const editBtn = document.getElementById('edit-animal-profile');
         const hideBtn = document.getElementById('hide-animal');
         const deleteBtn = document.getElementById('delete-animal');
+        const createRequestBtn = document.getElementById('create-request');
 
         editBtn.addEventListener('click', () => {
             window.location.href = `/staff/animals/${animalId}/edit`;
+        });
+
+        createRequestBtn.addEventListener('click', () => {
+            window.location.href = `/staff/new_request/${animalId}`;
         });
 
         hideBtn.addEventListener('click', () => {

@@ -1,0 +1,95 @@
+.volunteer-application {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    min-width: 400px;
+    max-width: 700px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+
+.volunteer-application:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.application-name {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.application-name,
+.application-status,
+.application-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column; /* Ensures text remains in a single column */
+}
+
+
+.application-message {
+    font-size: 1em;
+    color: #555;
+    margin: 10px 0;
+}
+
+.application-date {
+    font-size: 0.9em;
+    color: #777;
+}
+
+.application-status {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.application-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.approve-btn,
+.reject-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.approve-btn {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+.reject-btn {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+.application-list {
+    min-width: 500px;
+    max-width: 1000px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}

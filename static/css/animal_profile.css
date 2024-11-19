@@ -71,6 +71,11 @@ img {
     background-color: #e4002b;
 }
 
+.create-request-btn {
+    background-color: cadetblue;
+    min-width: 300px;
+}
+
 .staff-btn:hover {
     transition: background-color 0.2s;
     background-color: dimgray;

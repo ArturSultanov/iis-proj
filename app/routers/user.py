@@ -1,4 +1,5 @@
-from datetime import timezone
+from datetime import timezone, datetime
+from wsgiref.util import application_uri
 
 from fastapi import APIRouter, Request, HTTPException, Form, Depends
 from pydantic import BaseModel
@@ -6,12 +7,14 @@ from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 
 from app.database import db_dependency, UsersOrm
+from app.database.models import VolunteerApplicationsOrm
 from app.password import hash_password, verify_password
 from app.utils import session_dependency, session_id_cookie, create_session, templates
 
 user_router = APIRouter(prefix="/user",
                         tags=["user"])
 
+# Form to register a new user
 class RegisterFormIn(BaseModel):
     name: str = Form(...)
     username: str = Form(...)
@@ -22,9 +25,11 @@ class RegisterFormIn(BaseModel):
         if self.password != self.confirm_password:
             raise ValueError("Passwords do not match")
 
+# Form to login a user
 class LoginFormIn(BaseModel):
     username: str
     password: str
+
 
 @user_router.get("/signup", status_code=status.HTTP_200_OK)
 async def register_page(request: Request, session: session_dependency):
@@ -74,6 +79,7 @@ async def login_user(db: db_dependency, form: LoginFormIn, session: session_depe
     session_id, expiration = create_session(form.username, db)
     response = JSONResponse(content={session_id_cookie: session_id.hex})
     utc_expiration = expiration.astimezone(timezone.utc)
+    # Set the session_id cookie
     response.set_cookie(key=session_id_cookie,
                         value=session_id.hex,
                         expires=utc_expiration,
@@ -89,6 +95,7 @@ async def logout_user(db: db_dependency, session: session_dependency):
     db.delete(session)
     db.commit()
     response = JSONResponse(content={"message": "Logged out"})
+    # Delete the session_id cookie
     response.delete_cookie(key=session_id_cookie)
     return response
 
@@ -98,6 +105,7 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
         print("Keeping current session")
     if not session:
         return {"message": "Not logged in"}
+    # Delete all user's sessions except the current session if keep_current is True
     for other_session in session.user.sessions:
         if keep_current and session.id == other_session.id:
             continue
@@ -112,7 +120,11 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
 async def profile_page(request: Request, session: session_dependency):
     if not session:
         return RedirectResponse(url="/user/signin")
-    return templates.TemplateResponse("user/profile.html", {"request": request, "user": session.user})
+    return templates.TemplateResponse("user/profile.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user
+                                      })
 
 @user_router.get("/volunteer_application", status_code=status.HTTP_200_OK)
 async def volunteer_application_page(request: Request, session: session_dependency):
@@ -120,6 +132,24 @@ async def volunteer_application_page(request: Request, session: session_dependen
         return RedirectResponse(url="/user/signin")
     if not session.user.is_registered:
         return RedirectResponse(url="/user/profile")
-    app
-    return templates.TemplateResponse("user/volunteer_application.html", {"request": request})
+    application = session.user.volunteer_application
+    return templates.TemplateResponse("user/volunteer_application.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "application": application
+                                      })
+
+@user_router.post("/volunteer_application", status_code=status.HTTP_201_CREATED)
+async def volunteer_application(db: db_dependency, session: session_dependency, description: str = Form(...)):
+    if not session:
+        return {"message": "Not logged in"}
+    if not session.user.is_registered:
+        return {"message": "Already have other role"}
+    application = session.user.volunteer_application
+    if application:
+        return {"message": "Application already exists"}
+    application = VolunteerApplicationsOrm(user=session.user, date=datetime.now(), message=description)
+    db.add(application)
+    db.commit()
 
