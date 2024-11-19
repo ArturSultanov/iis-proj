@@ -38,6 +38,8 @@ class UsersOrm(Base):
         relationship("AdoptionRequestsOrm", back_populates="user", cascade="all, delete"))
     volunteer_application: Mapped["VolunteerApplicationsOrm"] = (
         relationship("VolunteerApplicationsOrm", back_populates="user", cascade="all, delete"))
+    walks: Mapped[list["WalksOrm"]] = (  # New Relationship
+        relationship("WalksOrm", back_populates="user", cascade="all, delete"))
 
     @classmethod
     def get_user(cls, db: Session, username: str) -> Self | None:
@@ -172,6 +174,7 @@ class WalksOrm(Base):
     status: Mapped[WalkStatus] = mapped_column(default=WalkStatus.pending)
 
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="scheduled_walks")
+    user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="walks")  # New Relationship
 
 class MedicalHistoriesOrm(Base):
     __tablename__ = 'medical_histories'

@@ -1,3 +1,5 @@
+<!-- templates/staff/dashboard.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +8,10 @@
     <link rel="stylesheet" href="../../static/css/main.css">
 </head>
 <body>
-<h1>Staff Dashboard</h1>
-<p>Welcome, <span id="name">{{ staff.name }}</span></p>
-<a href="/animals" class="link" style="min-width: 200px">Animals</a>
-<a href="/staff/volunteer_applications" class="link" style="min-width: 200px">Volunteer Applications</a>
+    <h1>Staff Dashboard</h1>
+    <p>Welcome, <span id="name">{{ staff.name }}</span></p>
+    <a href="/animals" class="link" style="min-width: 200px">Animals</a>
+    <a href="/staff/volunteer_applications" class="link" style="min-width: 200px">Volunteer Applications</a>
+    <a href="/staff/walk_requests" class="link" style="min-width: 200px">Walk Requests</a> <!-- New link -->
 </body>
 </html>

@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
@@ -7,9 +7,11 @@ from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_202_ACCEPTED, HTTP_303_SEE_OTHER
 
 from app.database import db_dependency, AnimalsOrm
-from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm
+from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm, \
+    WalkStatus, WalksOrm
 from app.utils import staff_dependency, templates, get_staff, application_status_to_int
 from datetime import datetime, timezone
+from sqlalchemy.orm import Session, joinedload
 
 staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
@@ -166,3 +168,85 @@ async def create_vet_request(db: db_dependency, animal: animal_dependency, staff
     db.add(new_request)
     db.commit()
     return {"message": "Request created successfully"}
+
+
+@staff_router.get("/walk_requests", status_code=HTTP_200_OK)
+async def walk_requests_page(
+        request: Request,
+        db: db_dependency,
+        status_filter: Optional[WalkStatus] = Query(default=None),
+):
+    """
+    Displays the walk requests page with filtering.
+    """
+    # Build the base query with eager loading
+    query = db.query(WalksOrm).options(
+        joinedload(WalksOrm.animal),
+        joinedload(WalksOrm.user)
+    ).filter(WalksOrm.status != WalkStatus.finished)
+
+    if status_filter:
+        query = query.filter(WalksOrm.status == status_filter)
+
+    walks = query.order_by(WalksOrm.date.desc()).all()
+
+    walk_data = [
+        {
+            "id": walk.id,
+            "animal_name": walk.animal.name,
+            "volunteer_name": walk.user.name,
+            "date": walk.date.strftime("%Y-%m-%d %H:%M"),
+            "duration": walk.duration,
+            "status": walk.status.value,
+        }
+        for walk in walks
+    ]
+
+    return templates.TemplateResponse(
+        "staff/walk_requests.html",
+        {"request": request, "walks": walk_data, "status_filter": status_filter.value if status_filter else None},
+    )
+
+
+@staff_router.post("/walk_requests/{walk_id}/accept", status_code=HTTP_200_OK)
+async def accept_walk_request(
+    walk_id: int,
+    db: db_dependency,
+    staff: staff_dependency,
+):
+    """
+    Accepts a walk request.
+    """
+    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
+    if not walk:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
+
+    if walk.status != WalkStatus.pending:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot accept this walk request.")
+
+    walk.status = WalkStatus.accepted
+    db.commit()
+
+    return {"message": "Walk request accepted successfully."}
+
+
+@staff_router.post("/walk_requests/{walk_id}/reject", status_code=HTTP_200_OK)
+async def reject_walk_request(
+    walk_id: int,
+    db: db_dependency,
+    staff: staff_dependency,
+):
+    """
+    Rejects a walk request.
+    """
+    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
+    if not walk:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
+
+    if walk.status != WalkStatus.pending:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot reject this walk request.")
+
+    walk.status = WalkStatus.rejected
+    db.commit()
+
+    return {"message": "Walk request rejected successfully."}
