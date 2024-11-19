@@ -39,7 +39,14 @@
         vaccinationForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const formData = new FormData(vaccinationForm);
+            const dateInput = document.getElementById('date').value;
+            const timeInput = document.getElementById('time').value;
+
+            const datetime = `${dateInput}T${timeInput}:00`;
+
+            const formData = new FormData();
+            formData.append("date", datetime);
+            formData.append("description", document.getElementById('description').value);
 
             const response = await fetch(`/vet/new_vaccination/${animalId}`, {
                 method: 'POST',
