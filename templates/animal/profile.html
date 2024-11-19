@@ -34,55 +34,70 @@
             {% endif %}
             <button class="staff-btn del-btn" id="delete-animal">Delete</button>
         </div>
+        {% endif %}
 
+        {% if user and user.is_volunteer %}
+        <div class="animal-profile-volunteer-section">
+            <button class="staff-btn rsv-btn" id="reserve-animal">Reserve walk</button>
+        </div>
         {% endif %}
     </div>
 </body>
 
 {% if user %}
-{% if user.is_staff %}
-<script>
-    const animalId = {{ animal.id }};
+    {% if user.is_staff %}
+    <script>
+        const animalId = {{ animal.id }};
 
-    const editBtn = document.getElementById('edit-animal-profile');
-    const hideBtn = document.getElementById('hide-animal');
-    const deleteBtn = document.getElementById('delete-animal');
+        const editBtn = document.getElementById('edit-animal-profile');
+        const hideBtn = document.getElementById('hide-animal');
+        const deleteBtn = document.getElementById('delete-animal');
 
-    editBtn.addEventListener('click', () => {
-        window.location.href = `/staff/animals/${animalId}/edit`;
-    });
+        editBtn.addEventListener('click', () => {
+            window.location.href = `/staff/animals/${animalId}/edit`;
+        });
 
-    hideBtn.addEventListener('click', () => {
-        const hidden = {{ animal.hidden|string|lower }};
-        fetch(`/staff/animals/${animalId}/hide?hidden=${!hidden}`, {
-            method: 'PATCH',
-        })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    alert('Failed to hide the animal');
-                }
-            });
-    });
-
-    deleteBtn.addEventListener('click', () => {
-        // ask for confirmation
-        if (confirm('Are you sure you want to delete this animal?')) {
-            fetch(`/staff/animals/${animalId}`, {
-                method: 'DELETE',
+        hideBtn.addEventListener('click', () => {
+            const hidden = {{ animal.hidden|string|lower }};
+            fetch(`/staff/animals/${animalId}/hide?hidden=${!hidden}`, {
+                method: 'PATCH',
             })
                 .then(response => {
                     if (response.ok) {
-                        window.location.href = '/animals';
+                        window.location.reload();
                     } else {
-                        alert('Failed to delete the animal');
+                        alert('Failed to hide the animal');
                     }
                 });
-        }
-    });
-</script>
-{% endif %}
-{% endif %}
+        });
 
+        deleteBtn.addEventListener('click', () => {
+            // ask for confirmation
+            if (confirm('Are you sure you want to delete this animal?')) {
+                fetch(`/staff/animals/${animalId}`, {
+                    method: 'DELETE',
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/animals';
+                        } else {
+                            alert('Failed to delete the animal');
+                        }
+                    });
+            }
+        });
+    </script>
+
+    {% elif user.is_volunteer %}
+    <script>
+        const animalId = {{ animal.id }};
+
+        const reserveBtn = document.getElementById('reserve-animal');
+
+        reserveBtn.addEventListener('click', () => {
+            window.location.href = `/volunteer/animals/${animalId}/calendar`;
+        });
+    </script>
+    {% endif %}
+{% endif %}
 </html>

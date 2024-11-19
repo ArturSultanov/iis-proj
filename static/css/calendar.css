@@ -1,0 +1,38 @@
+.calendar table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.calendar th,
+.calendar td {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.calendar .time-slot {
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+.calendar .time-slot.selected {
+    background-color: #4caf50;
+    color: white;
+}
+
+.calendar .time-slot.occupied {
+    background-color: #e7a0a0; /* Light red for occupied slots */
+    cursor: not-allowed;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-controls #week-dates {
+    font-size: 1.2em;
+    font-weight: bold;
+}
