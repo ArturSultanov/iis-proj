@@ -18,9 +18,9 @@
             <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
             <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
             <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
-            <option value="rejected" {% if status_filter == 'started' %}selected{% endif %}>Started</option>
-            <option value="rejected" {% if status_filter == 'finished' %}selected{% endif %}>Finished</option>
-            <option value="rejected" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            <option value="started" {% if status_filter == 'started' %}selected{% endif %}>Started</option>
+            <option value="finished" {% if status_filter == 'finished' %}selected{% endif %}>Finished</option>
+            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
         </select>
     </div>
 
