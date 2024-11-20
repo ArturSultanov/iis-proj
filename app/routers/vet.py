@@ -4,7 +4,7 @@ from typing import Annotated
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from datetime import datetime, timezone
 
-from app.utils import get_vet, vet_dependency, templates
+from app.utils import get_vet, vet_dependency, templates, animal_dependency
 from app.database import db_dependency, VetRequestOrm, VetRequestStatus, MedicalHistoriesOrm, TreatmentsOrm, AnimalsOrm, \
     VaccinationsOrm
 from app.utils import get_vet, vet_dependency, templates
@@ -12,16 +12,6 @@ from app.utils import get_vet, vet_dependency, templates
 vet_router = APIRouter(prefix="/vet",
                        tags=["vet"],
                        dependencies=[Depends(get_vet)])
-
-
-def get_animal(animal_id: int, db: db_dependency) -> AnimalsOrm:
-    animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
-    if not animal:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Animal not found")
-    return animal
-
-
-animal_dependency = Annotated[AnimalsOrm, Depends(get_animal)]
 
 
 @vet_router.get("/dashboard", status_code=HTTP_200_OK)

@@ -168,15 +168,23 @@ async def reserve_walks(
         duration = int((end_time - start_time).total_seconds() / 60)  # Duration in minutes
 
         # Check for existing walks at the same date
-        overlapping_walks = [
-            walk for walk in db.query(WalksOrm).filter(WalksOrm.animal_id == animal.id).all()
-            if walk.date <= end_time and (walk.date + timedelta(minutes=walk.duration)) >= start_time
-        ]
+
+        overlapping_walks = list(filter(
+            lambda s_walk:
+            s_walk.status not in [WalkStatus.rejected, WalkStatus.cancelled] and
+            s_walk.date < end_time and
+            (s_walk.date + timedelta(minutes=s_walk.duration)) > start_time,
+            animal.scheduled_walks
+        ))
 
         if overlapping_walks:
+            overlapping_details = [
+                f"Walk on {walk.date.strftime('%Y-%m-%d %H:%M')} for {walk.duration} minutes (status: {walk.status})"
+                for walk in overlapping_walks
+            ]
             raise HTTPException(
                 status_code=HTTP_400_BAD_REQUEST,
-                detail=f"Requested time slots overlap with existing walks."
+                detail=f"Requested time slots overlap with existing walks: {', '.join(overlapping_details)}"
             )
 
         new_walk = WalksOrm(
@@ -206,9 +214,11 @@ async def get_scheduled_walks(
     if animal.status not in [AnimalStatus.available] or animal.hidden:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is available.")
 
-    scheduled_walks = filter(
-        lambda x: start_date <= x.date < end_date and x.status in [WalkStatus.pending, WalkStatus.accepted,
-                                                                   WalkStatus.finished], animal.scheduled_walks)
+    scheduled_walks = list(filter(
+        lambda s_walk:
+        s_walk.status not in [WalkStatus.rejected, WalkStatus.cancelled] and
+        start_date <= s_walk.date < end_date, animal.scheduled_walks
+    ))
     # Generate scheduled slots
     scheduled_slots = []
 

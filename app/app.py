@@ -114,3 +114,8 @@ async def dashboard(request: Request, session: session_dependency):
         return RedirectResponse(url="/vet/dashboard")
     if session.user.is_volunteer:
         return RedirectResponse(url="/volunteer/dashboard")
+
+
+@app.get("/favicon.ico")
+async def favicon(request: Request):
+    return RedirectResponse(url="/static/favicon.ico")

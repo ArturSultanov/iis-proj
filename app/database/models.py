@@ -158,6 +158,7 @@ class WalkStatus(enum.Enum):
     pending = 'pending'
     accepted = 'accepted'
     rejected = 'rejected'
+    started = 'started'
     finished = 'finished'
     cancelled = 'cancelled'
 
