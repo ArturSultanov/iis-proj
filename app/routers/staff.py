@@ -250,3 +250,69 @@ async def reject_walk_request(
     db.commit()
 
     return {"message": "Walk request rejected successfully."}
+
+
+@staff_router.post("/walk_requests/{walk_id}/start", status_code=HTTP_200_OK)
+async def finish_walk_request(
+    walk_id: int,
+    db: db_dependency,
+    staff: staff_dependency,
+):
+    """
+    Rejects a walk request.
+    """
+    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
+    if not walk:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
+
+    if walk.status != WalkStatus.accepted:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot accept this walk request.")
+
+    walk.status = WalkStatus.started
+    db.commit()
+
+    return {"message": "Walk request rejected successfully."}
+
+
+@staff_router.post("/walk_requests/{walk_id}/finish", status_code=HTTP_200_OK)
+async def finish_walk_request(
+    walk_id: int,
+    db: db_dependency,
+    staff: staff_dependency,
+):
+    """
+    Rejects a walk request.
+    """
+    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
+    if not walk:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
+
+    if walk.status != WalkStatus.started:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot finish this walk request.")
+
+    walk.status = WalkStatus.finished
+    db.commit()
+
+    return {"message": "Walk request rejected successfully."}
+
+
+@staff_router.post("/walk_requests/{walk_id}/cancel", status_code=HTTP_200_OK)
+async def cancel_walk_request(
+    walk_id: int,
+    db: db_dependency,
+    staff: staff_dependency,
+):
+    """
+    Rejects a walk request.
+    """
+    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
+    if not walk:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
+
+    if walk.status != WalkStatus.accepted:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot cancel this walk request.")
+
+    walk.status = WalkStatus.cancelled
+    db.commit()
+
+    return {"message": "Walk request rejected successfully."}

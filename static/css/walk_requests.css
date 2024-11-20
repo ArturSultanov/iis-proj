@@ -1,0 +1,87 @@
+/* static/css/walk_requests.css */
+
+/* Styles for the walk requests page */
+.table-container {
+    max-height: 600px;
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+th {
+    background-color: #f4f4f4;
+    position: sticky;
+    top: 0;
+}
+
+.action-button {
+    padding: 6px 12px;
+    cursor: pointer;
+    margin-right: 5px;
+    color: white;
+}
+
+.accept-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+}
+
+.reject-button {
+    background-color: #f44336; /* Red */
+    border: none;
+}
+
+.finish-button {
+    background-color: #ff9800; /* Orange */
+    border: none;
+}
+
+.cancel-button {
+    background-color: #9c27b0; /* Purple */
+    border: none;
+}
+
+
+.start-button {
+    background-color: #27b029; /* Purple */
+    border: none;
+}
+
+
+.filter-container {
+    margin-bottom: 20px;
+}
+
+.filter-label {
+    font-weight: bold;
+}
+
+.header h1 {
+    margin-bottom: 20px;
+}
+
+.link {
+    text-decoration: none;
+    color: #007BFF;
+    padding: 8px 16px;
+    border: 1px solid #007BFF;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.link:hover {
+    background-color: #007BFF;
+    color: white;
+}
