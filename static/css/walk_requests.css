@@ -49,13 +49,13 @@ th {
 }
 
 .cancel-button {
-    background-color: #9c27b0; /* Purple */
+    background-color: #f44336; /* Red */
     border: none;
 }
 
 
 .start-button {
-    background-color: #27b029; /* Purple */
+    background-color: #4CAF50; /* Green */
     border: none;
 }
 
@@ -66,22 +66,4 @@ th {
 
 .filter-label {
     font-weight: bold;
-}
-
-.header h1 {
-    margin-bottom: 20px;
-}
-
-.link {
-    text-decoration: none;
-    color: #007BFF;
-    padding: 8px 16px;
-    border: 1px solid #007BFF;
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.link:hover {
-    background-color: #007BFF;
-    color: white;
 }

@@ -5,7 +5,8 @@ from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from app.database import db_dependency, WalksOrm, WalkStatus, AnimalStatus
-from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency
+from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency, session_dependency
+
 from pydantic import BaseModel
 
 
@@ -23,11 +24,17 @@ volunteer_router = APIRouter(prefix="/volunteer",
 
 
 @volunteer_router.get("/dashboard", status_code=HTTP_200_OK)
-async def staff_dashboard(request: Request, volunteer: volunteer_dependency):
+async def staff_dashboard(request: Request, volunteer: volunteer_dependency, session: session_dependency):
     """
     Render the template with volunteer dashboard
     """
-    return templates.TemplateResponse("volunteer/dashboard.html", {"request": request, "staff": volunteer})
+    return templates.TemplateResponse(
+        "volunteer/dashboard.html", {
+            "request": request,
+            "staff": volunteer,
+            "user": session.user
+        }
+    )
 
 
 @volunteer_router.get("/history", status_code=HTTP_200_OK)
@@ -35,6 +42,7 @@ async def volunteer_history(
         request: Request,
         volunteer: volunteer_dependency,
         db: db_dependency,
+        session: session_dependency
 ):
     """
     Returns the history of the walks for the current volunteer
@@ -67,7 +75,11 @@ async def volunteer_history(
 
     return templates.TemplateResponse(
         "volunteer/history.html",
-        {"request": request, "walks": walk_data},
+        {
+            "request": request,
+            "walks": walk_data,
+            "user": session.user
+        },
     )
 
 
@@ -103,6 +115,7 @@ async def cancel_walk(
 async def reserve_calendar(
         request: Request,
         animal: animal_dependency,
+        session: session_dependency
 ):
     """
     Displays the calendar interface for reserving walks for a specific animal.
@@ -116,6 +129,7 @@ async def reserve_calendar(
         {
             "request": request,
             "animal": animal,
+            "user": session.user
         },
     )
 
