@@ -133,3 +133,26 @@ input[type="file"] {
 textarea {
     min-height: 60px;
 }
+
+select {
+    border: 1px solid #424242;
+    width: 40%;
+    margin: 10px;
+    padding: 5px 5px;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #ffffff;
+    color: #333333;
+    cursor: pointer;
+}
+
+select:focus {
+    border-color: #00a9e0;
+    outline: none;
+}
+
+.error {
+    color: var(--fit-red);
+    font-size: 0.9em;
+    margin-top: 5px;
+}
