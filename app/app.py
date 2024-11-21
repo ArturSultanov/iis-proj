@@ -4,13 +4,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER
+from starlette.status import HTTP_200_OK
 
 from starlette.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import get_db, db_dependency, UsersOrm, Role, AnimalsOrm, create_all_tables
-from app.database import Base as dbBase
 from app.password import hash_password
 from app.routers import *
 from app.utils import session_dependency, templates
@@ -21,13 +20,24 @@ async def lifespan(app: FastAPI):
     create_all_tables()
     # create a session to add the admin user if not exists
     start_db = next(get_db())
-    # dbBase.metadata.create_all(start_db.get_bind())
     # add admin user if not exists
     if not UsersOrm.get_user(start_db, "admin"):
         # add admin user with password "admin"
         start_db.add(UsersOrm(username="admin", name="admin", password=hash_password("admin"), role=Role.admin))
-        start_db.commit()
-        start_db.close()
+    if not UsersOrm.get_user(start_db, "staff"):
+        # add staff user with password "staff"
+        start_db.add(UsersOrm(username="staff", name="staff", password=hash_password("staff"), role=Role.staff))
+    if not UsersOrm.get_user(start_db, "vet"):
+        # add vet user with password "vet"
+        start_db.add(UsersOrm(username="vet", name="vet", password=hash_password("vet"), role=Role.vet))
+    if not UsersOrm.get_user(start_db, "volunteer"):
+        # add volunteer user with password "volunteer"
+        start_db.add(UsersOrm(username="volunteer", name="volunteer", password=hash_password("volunteer"), role=Role.volunteer))
+    if not UsersOrm.get_user(start_db, "registered"):
+        # add user registered with password "registered"
+        start_db.add(UsersOrm(username="registered", name="registered", password=hash_password("registered"), role=Role.registered))
+    start_db.commit()
+    start_db.close()
     yield
 
 # Create the FastAPI app
@@ -80,14 +90,11 @@ async def animals_page(request: Request, db: db_dependency, session: session_dep
                                           "page": page
                                       })
 
-# This is a placeholder photo that will be used if the animal does not have a photo
-placeholder_photo : bytes = open("static/no-image-available.jpg", "rb").read()
-
 @app.get("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def animal_photo(animal_id: int, db: db_dependency):
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal or not animal.photo:
-        return HTMLResponse(content=placeholder_photo, media_type="image/jpeg")
+        return RedirectResponse(url="/static/no-image-available.jpg")
     return HTMLResponse(content=animal.photo, media_type="image/jpeg")
 
 @app.get("/animals/{animal_id}/profile")

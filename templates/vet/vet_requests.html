@@ -34,7 +34,7 @@
                 <td>{{ vet_request.animal.name }}</td>
                 <td>{{ vet_request.user.name }}</td>
                 <td>{{ vet_request.date.strftime('%Y-%m-%d %H:%M') }}</td>
-                <td>{{ vet_request.status.value }}</td>
+                <td><span class="{{ vet_request.status.value }}">{{ vet_request.status.value }}</span></td>
                 <td>
                     <a href="/vet/request/{{ vet_request.id }}" class="link">View Details</a>
                 </td>

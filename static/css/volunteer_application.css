@@ -45,30 +45,6 @@ textarea {
     border-radius: 10px;
 }
 
-.rejected {
-    background-color: lightcoral;
-    color: white;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 5px;
-}
-
-.accepted {
-    background-color: lightgreen;
-    color: white;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 5px;
-}
-
-.pending {
-    background-color: orange;
-    color: white;
-    padding: 10px 20px;
-    font-weight: bold;
-    border-radius: 5px;
-}
-
 #description {
     font-size: 1.1em;
     color: #333;
