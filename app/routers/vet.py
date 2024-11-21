@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Request, Form, HTTPException, status
-from fastapi.params import Depends
-from typing import Annotated
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from datetime import datetime, timezone
 
-from app.utils import get_vet, vet_dependency, templates, animal_dependency
-from app.database import db_dependency, VetRequestOrm, VetRequestStatus, MedicalHistoriesOrm, TreatmentsOrm, AnimalsOrm, \
+from fastapi import APIRouter, Request, Form, HTTPException, status
+from fastapi.params import Depends
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED
+
+from app.database import db_dependency, VetRequestOrm, VetRequestStatus, MedicalHistoriesOrm, TreatmentsOrm, \
     VaccinationsOrm
-from app.utils import get_vet, vet_dependency, templates
+from app.utils import animal_dependency
+from app.utils import get_vet, vet_dependency, templates, session_dependency
 
 vet_router = APIRouter(prefix="/vet",
                        tags=["vet"],
@@ -15,8 +15,8 @@ vet_router = APIRouter(prefix="/vet",
 
 
 @vet_router.get("/dashboard", status_code=HTTP_200_OK)
-async def vet_dashboard(request: Request):
-    return templates.TemplateResponse("vet/dashboard.html", {"request": request})
+async def vet_dashboard(request: Request, session: session_dependency):
+    return templates.TemplateResponse("vet/dashboard.html", {"request": request, "user": session.user})
 
 
 @vet_router.get("/requests", status_code=HTTP_200_OK)
@@ -29,6 +29,7 @@ async def get_vet_requests(request: Request, db: db_dependency, vet: vet_depende
     return templates.TemplateResponse("vet/vet_requests.html", {
         "request": request,
         "vet": vet,
+        "user": vet,
         "vet_requests": vet_requests,
         "status": status
     })
@@ -40,6 +41,7 @@ async def view_vet_request(request: Request, request_id: int, db: db_dependency,
     return templates.TemplateResponse("vet/vet_request_details.html", {
         "request": request,
         "vet": vet,
+        "user": vet,
         "vet_request": vet_request
     })
 

@@ -37,6 +37,7 @@ async def register_page(request: Request, session: session_dependency):
         return RedirectResponse(url="/user/profile")
     return templates.TemplateResponse("user/signup.html", {"request": request})
 
+
 @user_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def register_user(db: db_dependency, form: RegisterFormIn, session: session_dependency):
     if session:
@@ -61,6 +62,7 @@ async def login_page(request: Request, session: session_dependency):
     if session:
         return RedirectResponse(url="/user/profile")
     return templates.TemplateResponse("user/signin.html", {"request": request})
+
 
 @user_router.post("/signin", status_code=status.HTTP_200_OK)
 async def login_user(db: db_dependency, form: LoginFormIn, session: session_dependency):
@@ -88,6 +90,7 @@ async def login_user(db: db_dependency, form: LoginFormIn, session: session_depe
                         samesite="strict")
     return response
 
+
 @user_router.delete("/logout", status_code=status.HTTP_200_OK)
 async def logout_user(db: db_dependency, session: session_dependency):
     if not session:
@@ -98,6 +101,7 @@ async def logout_user(db: db_dependency, session: session_dependency):
     # Delete the session_id cookie
     response.delete_cookie(key=session_id_cookie)
     return response
+
 
 @user_router.delete("/logout/all", status_code=status.HTTP_200_OK)
 async def logout_all(db: db_dependency, session: session_dependency, keep_current: bool = False):
@@ -116,6 +120,7 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
         response.delete_cookie(key=session_id_cookie)
     return response
 
+
 @user_router.get("/profile", status_code=status.HTTP_200_OK)
 async def profile_page(request: Request, session: session_dependency):
     if not session:
@@ -125,6 +130,7 @@ async def profile_page(request: Request, session: session_dependency):
                                           "request": request,
                                           "user": session.user
                                       })
+
 
 @user_router.get("/volunteer_application", status_code=status.HTTP_200_OK)
 async def volunteer_application_page(request: Request, session: session_dependency):
@@ -153,6 +159,7 @@ async def volunteer_application(db: db_dependency, session: session_dependency, 
     db.add(application)
     db.commit()
 
+
 @user_router.get("/change_password", status_code=status.HTTP_200_OK)
 async def change_password_page(request: Request, session: session_dependency):
     if not session:
@@ -162,6 +169,7 @@ async def change_password_page(request: Request, session: session_dependency):
                                           "request": request,
                                           "user": session.user
                                       })
+
 
 @user_router.post("/change_password", status_code=status.HTTP_200_OK)
 async def change_password(db: db_dependency, session: session_dependency, old_password: str = Form(...), new_password: str = Form(...), confirm_password: str = Form(...)):
