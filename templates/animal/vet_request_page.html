@@ -1,47 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vet Request</title>
-    <link rel="stylesheet" href="../../static/css/horizontal_form.css">
-    <link rel="stylesheet" href="../../static/css/vertical_form.css">
-    <link rel="stylesheet" href="../../static/css/main.css">
-    <link rel="stylesheet" href="../../static/css/animal_profile.css">
-    <style>
+{% set title='Vet Request' %}
 
-        .form {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-        }
+{% extends 'base.html' %}
 
-        label {
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 10px;
-            display: block;
-        }
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/ver_request_page.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/animal_profile.css') }}">
+{% endblock %}
 
-        textarea {
-            width: 95%;
-            padding: 12px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 1em;
-            margin-bottom: 20px;
-            resize: vertical;
-            min-height: 100px;
-            box-sizing: border-box;
-        }
-    </style>
-</head>
-<body>
-        <h1>Veterinarian Request For Animal: {{ animal.name }}</h1>
-        <div class="form">
+{% block content %}
+    <h1>Veterinarian Request For Animal: {{ animal.name }}</h1>
+    <div class="form">
         <form id="vet_request_form">
             <div class="container" style="align-items: center">
                 <label for="description">Description of the issue:</label>
@@ -55,24 +25,11 @@
             <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>
         </div>
     </div>
-</body>
-<script>
-    const animalId = {{ animal.id }};
-    const vetRequestForm = document.getElementById('vet_request_form');
+{% endblock %}
 
-    vetRequestForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const formData = new FormData(vetRequestForm);
-
-        const response = await fetch(`/staff/new_request/${animalId}`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            window.location.href = `/animals/${animalId}/profile`;
-        }
-    });
-</script>
-</html>
+{% block scripts %}
+    <script>
+        const animalId = {{ animal.id }};
+    </script>
+    <script src="{{ url_for('static', path='js/animal/vet_request_page.js') }}"></script>
+{% endblock %}
