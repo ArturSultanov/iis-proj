@@ -2,12 +2,11 @@ from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
+from pydantic import BaseModel
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from app.database import db_dependency, WalksOrm, WalkStatus, AnimalStatus
 from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency, session_dependency
-
-from pydantic import BaseModel
 
 
 class Slot(BaseModel):

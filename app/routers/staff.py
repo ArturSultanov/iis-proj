@@ -1,18 +1,18 @@
+from datetime import datetime, timezone
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
+from sqlalchemy.orm import joinedload
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_202_ACCEPTED, HTTP_303_SEE_OTHER
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
 from app.database import db_dependency, AnimalsOrm
 from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm, \
     WalkStatus, WalksOrm
 from app.utils import staff_dependency, templates, get_staff, application_status_to_int, animal_dependency, \
     session_dependency
-from datetime import datetime, timezone
-from sqlalchemy.orm import Session, joinedload
 
 staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],

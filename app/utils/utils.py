@@ -1,17 +1,16 @@
-import sys
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
+from typing import Annotated as typingAnnotated
 from uuid import UUID, uuid4
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 from fastapi.params import Cookie
 from pydantic import BaseModel
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_303_SEE_OTHER, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from starlette.templating import Jinja2Templates
 
 from app.config import settings
-from app.database import UsersOrm, Role, db_dependency, SessionsOrm
-from typing import Annotated as typingAnnotated
-
+from app.database import UsersOrm, db_dependency, SessionsOrm
 from app.database.models import ApplicationStatus, AnimalsOrm
 
 # This is default session duration

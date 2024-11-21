@@ -1,11 +1,3 @@
-
-// const animalId = {{ animal.id }};
-
-const animalIdInt = parseInt(animalId, 10);
-if (isNaN(animalIdInt)) {
-    console.error('Invalid animal ID');
-}
-
 let currentStartDate = new Date();
 const selectedSlots = new Set();
 

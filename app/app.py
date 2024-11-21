@@ -3,17 +3,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER
-
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
+from starlette.status import HTTP_200_OK
 
 from app.config import settings
 from app.database import get_db, db_dependency, UsersOrm, Role, AnimalsOrm, create_all_tables
-from app.database import Base as dbBase
 from app.password import hash_password
 from app.routers import *
 from app.utils import session_dependency, templates
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

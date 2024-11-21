@@ -1,8 +1,9 @@
-from typing import Annotated as typingAnnotated, Iterable, Generator
+from typing import Annotated as typingAnnotated, Generator
 
 from fastapi import Depends
 from sqlalchemy import create_engine, String
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
+
 from app.config import settings
 
 # Database engine

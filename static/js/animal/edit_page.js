@@ -2,7 +2,7 @@ document.getElementById('edit-name').addEventListener('click', function() {
     var name = prompt('Enter new name');
     // put with new_name as query parameter
     if (name) {
-        fetch('/staff/animals/{{ animal.id }}/name?new_name=' + name, {
+        fetch(`/staff/animals/${animalId}/name?new_name=` + name, {
             method: 'PUT'
         })
         .then(response => response.json())
@@ -20,12 +20,12 @@ document.getElementById('photo_upload_form').addEventListener('submit', function
     let response;
     if (photo) {
         formData.append('photo', photo);
-        response = fetch('/staff/animals/{{ animal.id }}/photo', {
+        response = fetch('/staff/animals/'+ animalId +'/photo', {
             method: 'PATCH',
             body: formData
         });
     } else {
-        response = fetch('/staff/animals/{{ animal.id }}/photo', {
+        response = fetch('/staff/animals/'+ animalId +'/photo', {
             method: 'DELETE'
         });
     }
@@ -35,7 +35,7 @@ document.getElementById('photo_upload_form').addEventListener('submit', function
         .then(response => response.json())
         .then(data => {
             // fetch new photo
-            fetch('/animals/{{ animal.id }}/photo', {
+            fetch('/animals/'+ animalId +'/photo', {
                 method: 'GET'
             })
             .then(response => response.blob())
@@ -62,7 +62,7 @@ document.getElementById('photo').addEventListener('change', function() {
 document.getElementById('edit-age').addEventListener('click', function() {
     var age = prompt('Enter new age');
     if (age) {
-        fetch('/staff/animals/{{ animal.id }}/age?new_age=' + age, {
+        fetch('/staff/animals/'+ animalId +'/age?new_age=' + age, {
             method: 'PATCH'
         })
         .then(response => response.json())
@@ -78,7 +78,7 @@ document.getElementById('edit-description').addEventListener('click', function()
     // encode description with newlines
     var query_encoded = encodeURIComponent(description).replace(/%0A/g, '%0D%0A');
     if (description) {
-        fetch('/staff/animals/{{ animal.id }}/description?new_description=' + query_encoded, {
+        fetch('/staff/animals/'+ animalId +'/description?new_description=' + query_encoded, {
             method: 'PATCH'
         })
         .then(response => response.json())
@@ -91,7 +91,7 @@ document.getElementById('edit-description').addEventListener('click', function()
 document.getElementById('edit-species').addEventListener('click', function() {
     var species = prompt('Enter new species');
     if (species) {
-        fetch('/staff/animals/{{ animal.id }}/species?new_species=' + species, {
+        fetch('/staff/animals/'+ animalId +'/species?new_species=' + species, {
             method: 'PATCH'
         })
         .then(response => response.json())
