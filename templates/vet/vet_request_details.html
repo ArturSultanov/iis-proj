@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vet Request Details</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<body>
-    <h1>Vet Request Details</h1>
-
+{% set title='request details' %}
+{% extends 'base.html' %}
+{% block content %}
     <p><strong>Request ID:</strong> {{ vet_request.id }}</p>
     <p><strong>Animal:</strong>
         <a href="/animals/{{ vet_request.animal.id }}/profile" class="link">
@@ -32,48 +25,10 @@
     <div class="container">
         <a href="/vet/requests" class="link">Back to Vet Requests</a>
     </div>
-
-     <script>
-         const accept = document.getElementById('accept-btn');
-         const complete = document.getElementById('complete-btn');
-
-         accept?.addEventListener('click', function() {
-            fetch(`/vet/request/{{ vet_request.id }}/accept`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('status').innerText = 'accepted';
-                    accept.style.display = 'none';
-                    window.parent.postMessage({ action: 'updateStatus', requestId: {{ vet_request.id }}, status: 'accepted' }, '*');
-                } else {
-                    alert('Failed to accept the request.');
-                }
-            });
-         });
-
-         complete?.addEventListener('click', function() {
-            fetch(`/vet/request/{{ vet_request.id }}/complete`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('status').innerText = 'completed';
-                    complete.style.display = 'none';
-                    accept.style.display = 'none';
-                    window.parent.postMessage({ action: 'updateStatus', requestId: {{ vet_request.id }}, status: 'completed' }, '*');
-                } else {
-                    alert('Failed to complete the request.');
-                }
-            });
-        });
+{% endblock %}
+{% block scripts %}
+    <script>
+        const requestId = {{ vet_request.id }};
     </script>
-
-</body>
-</html>
+    <script src="{{ url_for('static', path='js/vet/vet_request_details.js') }}"></script>
+{% endblock %}
