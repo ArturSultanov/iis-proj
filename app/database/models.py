@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy import ForeignKey, LargeBinary, DateTime
 from sqlalchemy.orm import Mapped, Session, relationship
 from sqlalchemy.testing.schema import mapped_column
+
 from .database import Base, Str256, Str2048
 
 

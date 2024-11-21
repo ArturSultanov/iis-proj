@@ -6,8 +6,8 @@ __all__ = [
     'volunteer_router'
 ]
 
-from .user import user_router
 from .admin import admin_router
 from .staff import staff_router
+from .user import user_router
 from .vet import vet_router
 from .volunteer import volunteer_router

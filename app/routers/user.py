@@ -1,7 +1,6 @@
 from datetime import timezone, datetime
-from wsgiref.util import application_uri
 
-from fastapi import APIRouter, Request, HTTPException, Form, Depends
+from fastapi import APIRouter, Request, HTTPException, Form
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse

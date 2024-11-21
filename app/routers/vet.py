@@ -67,8 +67,8 @@ async def complete_vet_request(request_id: int, db: db_dependency):
 
 
 @vet_router.get("/new_treatment/{animal_id}", status_code=HTTP_200_OK)
-async def treatment(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("vet/treatment.html", {"request": request, "animal": animal})
+async def treatment(request: Request, animal: animal_dependency, vet: vet_dependency):
+    return templates.TemplateResponse("vet/treatment.html", {"request": request, "animal": animal, "user": vet})
 
 
 @vet_router.post("/new_treatment/{animal_id}", status_code=HTTP_201_CREATED)
@@ -88,8 +88,8 @@ async def create_treatment(db: db_dependency, animal: animal_dependency, date: d
 
 
 @vet_router.get("/new_vaccination/{animal_id}", status_code=HTTP_200_OK)
-async def vaccination(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("vet/vaccination.html", {"request": request, "animal": animal})
+async def vaccination(request: Request, animal: animal_dependency, vet: vet_dependency):
+    return templates.TemplateResponse("vet/vaccination.html", {"request": request, "animal": animal, "user": vet})
 
 
 @vet_router.post("/new_vaccination/{animal_id}", status_code=HTTP_201_CREATED)
@@ -109,8 +109,8 @@ async def create_vaccination(db: db_dependency, animal: animal_dependency, date:
 
 
 @vet_router.get("/new_medical_history/{animal_id}", status_code=HTTP_200_OK)
-async def medical_history(request: Request, animal: animal_dependency):
-    return templates.TemplateResponse("vet/medical_history.html", {"request": request, "animal": animal})
+async def medical_history(request: Request, animal: animal_dependency, vet: vet_dependency):
+    return templates.TemplateResponse("vet/medical_history.html", {"request": request, "animal": animal, "user": vet})
 
 
 @vet_router.post("/new_medical_history/{animal_id}", status_code=HTTP_201_CREATED)
@@ -131,11 +131,12 @@ async def create_medical_history(db: db_dependency, animal: animal_dependency, d
 
 
 @vet_router.get("/medical_history_profile/{animal_id}", status_code=HTTP_200_OK)
-async def get_medical_history(request: Request, animal: animal_dependency, db: db_dependency):
+async def get_medical_history(request: Request, animal: animal_dependency, db: db_dependency, vet: vet_dependency):
     animal_medical_history = db.query(MedicalHistoriesOrm).filter(MedicalHistoriesOrm.animal_id == animal.id).first()
     return templates.TemplateResponse("vet/medical_history_profile.html", {
         "request": request,
         "animal": animal,
+        "user": vet,
         "medical_history": animal_medical_history
     })
 
@@ -150,6 +151,7 @@ async def get_vet_requests(request: Request, db: db_dependency, animal: animal_d
     return templates.TemplateResponse("vet/vet_requests.html", {
         "request": request,
         "vet": vet,
+        "user": vet,
         "vet_requests": vet_requests,
         "status": status,
         "animal_name": animal.name
