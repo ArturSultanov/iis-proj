@@ -1,14 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>New Medical History</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-    <link rel="stylesheet" href="../../static/css/vertical_forms.css">
-    <link rel="stylesheet" href="../../static/css/horizontal_forms.css">
-</head>
-<body>
-    <h1>New Medical History For Animal: {{ animal.name }}</h1>
+{% set title='New Medical History' %}
+
+{% extends 'base.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1>{{ animal.name }}</h1>
     <div class="form">
         <form id="history_form">
             <div class="container">
@@ -23,32 +23,11 @@
     <div class="container">
         <a href="/vet/medical_history_profile/{{ animal.id }}" class="link" style="padding-top: 10px">Back to Animal Medical Hitory</a>
     </div>
+{% endblock %}
 
+{% block scripts %}
     <script>
         const animalId = {{ animal.id }};
-        const historyForm = document.getElementById('history_form');
-
-        historyForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const formData = new FormData(historyForm);
-
-            const response = await fetch(`/vet/new_medical_history/${animalId}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (data.message === "Medical history created successfully") {
-                    window.location.href = `/vet/medical_history_profile/${animalId}`;
-                } else {
-                    alert("Error: " + data.message);
-                }
-            } else {
-                alert("Error: Failed to create medical history.");
-            }
-        });
     </script>
-</body>
-</html>
+    <script src="{{ url_for('static', path='js/vet/medical_history.js') }}"></script>
+{% endblock %}

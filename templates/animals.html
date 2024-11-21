@@ -69,9 +69,10 @@
 </div>
 {% endif %}
 {% endblock %}
+
 {% block scripts %}
 {% if user and user.is_staff %}
-    <script src="{{ url_for('static', path='js/animal/animal_staff.js') }}"></script>
+    <script src="{{ url_for('static', path='js/animal/animals_staff.js') }}"></script>
 {% endif %}
-    <script src="{{ url_for('static', path='js/animal/animal_all.js') }}"></script>
+    <script src="{{ url_for('static', path='js/animal/animals_all.js') }}"></script>
 {% endblock %}
