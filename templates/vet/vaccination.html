@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>New Vaccination</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-    <link rel="stylesheet" href="../../static/css/vertical_forms.css">
-    <link rel="stylesheet" href="../../static/css/horizontal_forms.css">
-</head>
-<body>
-    <h1>New Vaccination For Animal: {{ animal.name }}</h1>
+{% set title='new vaccination' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/horizontal_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/vertical_form.css') }}">
+{% endblock %}
+{% block content %}
     <div class="form">
         <form id="vaccination_form">
             <div class="container">
@@ -31,47 +27,10 @@
     <div class="container">
         <a href="/vet/medical_history_profile/{{ animal.id }}" class="link" style="padding-top: 10px">Back to Animal Medical Hitory</a>
     </div>
-
+{% endblock %}
+{% block scripts %}
     <script>
         const animalId = {{ animal.id }};
-        const vaccinationForm = document.getElementById('vaccination_form');
-
-        vaccinationForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const dateInput = document.getElementById('date').value;
-            const timeInput = document.getElementById('time').value;
-
-            const datetime = `${dateInput}T${timeInput}:00`;
-
-            const formData = new FormData();
-            formData.append("date", datetime);
-            formData.append("description", document.getElementById('description').value);
-
-            const response = await fetch(`/vet/new_vaccination/${animalId}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                window.location.href = `/vet/medical_history_profile/${animalId}`;}
-            else if (response.status === 404) {
-                    alert("Medical history not found. Please create it first.");}
-            else {
-                alert("Error: Could not submit vaccination.");
-            }
-        });
-
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        const currentTime = now.toTimeString().slice(0, 5);
-
-        const dateInput = document.getElementById('date');
-        const timeInput = document.getElementById('time');
-        dateInput.value = today;
-        dateInput.min = today;
-        timeInput.value = currentTime;
-
     </script>
-</body>
-</html>
+    <script src="{{ url_for('static', filename='js/vet/vaccination.js') }}"></script>
+{% endblock %}

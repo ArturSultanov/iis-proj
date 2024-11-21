@@ -1,106 +1,3 @@
-{#<!DOCTYPE html>#}
-{#<html lang="en">#}
-{#<head>#}
-{#    <meta charset="UTF-8">#}
-{#    <title>Medical History</title>#}
-{#    <link rel="stylesheet" href="../../static/css/main.css">#}
-{#    <link rel="stylesheet" href="../../static/css/table.css">#}
-{#    <style>#}
-{#        caption {#}
-{#            background-color: #008bb8;#}
-{#            color: #ffffff;#}
-{#            padding: 10px;#}
-{#            text-align: center;#}
-{#        }#}
-{#    </style>#}
-{#</head>#}
-{#<body>#}
-{#<h1>Medical History of Animal: {{ animal.name }}</h1>#}
-{##}
-{#{% if medical_history %}#}
-{#    <p><strong>Date of Creation:</strong> {{ medical_history.start_date }} </p>#}
-{#    <p><strong>Description:</strong> {{ medical_history.description }}</p>#}
-{#<div style="display: flex; gap: 20px;">#}
-{#    <table>#}
-{#        <caption>Treatments</caption>#}
-{#        <thead>#}
-{#            <tr>#}
-{#                <th>Description</th>#}
-{#                <th>Date</th>#}
-{#            </tr>#}
-{#        </thead>#}
-{#        <tbody>#}
-{#            {% for treatment in medical_history.treatments %}#}
-{#                <tr>#}
-{#                    <td>{{ treatment.description }}</td>#}
-{#                    <td>{{ treatment.date }}</td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#        </tbody>#}
-{#    </table>#}
-{##}
-{#    <table>#}
-{#        <caption>Vaccinations</caption>#}
-{#        <thead>#}
-{#            <tr>#}
-{#                <th>Description</th>#}
-{#                <th>Date</th>#}
-{#            </tr>#}
-{#        </thead>#}
-{#        <tbody>#}
-{#            {% for vaccination in medical_history.vaccinations %}#}
-{#                <tr>#}
-{#                    <td>{{ vaccination.description }}</td>#}
-{#                    <td>{{ vaccination.date }}</td>#}
-{#                </tr>#}
-{#            {% endfor %}#}
-{#        </tbody>#}
-{#    </table>#}
-{#</div>#}
-{##}
-{##}
-{#{% else %}#}
-{#    <p>No medical history records available for this animal.</p>#}
-{#    <button class="vet-btn create-history-btn" id="create-history">Create Medical History</button>#}
-{#{% endif %}#}
-{#<div class="animal-profile-vet-section">#}
-{#    <button class="vet-btn treatment-btn" id="add-treatment">Prescribe Treatment</button>#}
-{#    <button class="vet-btn vaccination-btn" id="add-vaccination">Schedule vaccination</button>#}
-{#    <button class="vet-btn requests-btn" id="show-requests">Show Vet Requests</button>#}
-{#</div>#}
-{#<div class="container">#}
-{#    <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>#}
-{#</div>#}
-{##}
-{#<script>#}
-{#    const animalId = {{ animal.id }};#}
-{#    const createHistoryBtn = document.getElementById('create-history');#}
-{#    const treatmentBtn = document.getElementById('add-treatment');#}
-{#    const vaccinationBtn = document.getElementById('add-vaccination');#}
-{#    const requestsBtn = document.getElementById('show-requests');#}
-{##}
-{#    if (createHistoryBtn) {#}
-{#        createHistoryBtn.addEventListener('click', () => {#}
-{#            window.location.href = `/vet/new_medical_history/${animalId}`;#}
-{#        });#}
-{#    }#}
-{##}
-{#    treatmentBtn.addEventListener('click', () => {#}
-{#        window.location.href = `/vet/new_treatment/${animalId}`;#}
-{#    });#}
-{##}
-{#    vaccinationBtn.addEventListener('click', () => {#}
-{#        window.location.href = `/vet/new_vaccination/${animalId}`;#}
-{#    });#}
-{##}
-{#    requestsBtn.addEventListener('click', () => {#}
-{#        window.location.href = `/vet/requests/${animalId}`;#}
-{#    });#}
-{#</script>#}
-{#</body>#}
-{#</html>#}
-
-
 {% set title='New Medical History' %}
 
 {% extends 'base.html' %}
@@ -172,9 +69,9 @@
     <button class="vet-btn vaccination-btn" id="add-vaccination">Schedule vaccination</button>
     <button class="vet-btn requests-btn" id="show-requests">Show Vet Requests</button>
 </div>
-<div class="container">
-    <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>
-</div>
+{#<div class="container">#}
+{#    <a href="/animals/{{ animal.id }}/profile" class="link" style="padding-top: 10px">Back to Animal Profile</a>#}
+{#</div>#}
 {% endblock %}
 
 {% block scripts %}
