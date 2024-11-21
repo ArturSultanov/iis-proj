@@ -122,10 +122,18 @@ const confirmReservation = () => {
         return `${date}T${hour}:00`;
     });
 
+    // Get the selected location
+    const locationSelect = document.getElementById('location');
+    const selectedLocation = locationSelect.value;
+
+    // Include the location in the request body
     fetch(`/volunteer/animals/${animalId}/reserve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(slots),
+        body: JSON.stringify({
+            slots: slots,
+            location: selectedLocation,
+        }),
     }).then(response => {
         if (response.ok) {
             alert('Reservation successful!');
@@ -137,6 +145,7 @@ const confirmReservation = () => {
         }
     });
 };
+
 
 /** Initialize the calendar */
 const initializeCalendar = () => {

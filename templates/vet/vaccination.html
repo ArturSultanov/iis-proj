@@ -1,8 +1,8 @@
 {% set title='new vaccination' %}
 {% extends 'base.html' %}
 {% block styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/horizontal_form.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/vertical_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
 {% endblock %}
 {% block content %}
     <div class="form">
@@ -28,9 +28,10 @@
         <a href="/vet/medical_history_profile/{{ animal.id }}" class="link" style="padding-top: 10px">Back to Animal Medical Hitory</a>
     </div>
 {% endblock %}
+
 {% block scripts %}
     <script>
         const animalId = {{ animal.id }};
     </script>
-    <script src="{{ url_for('static', filename='js/vet/vaccination.js') }}"></script>
+    <script src="{{ url_for('static', path='js/vet/vaccinations.js') }}"></script>
 {% endblock %}

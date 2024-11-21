@@ -9,12 +9,9 @@ from app.database import db_dependency, WalksOrm, WalkStatus, AnimalStatus
 from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency, session_dependency
 
 
-class Slot(BaseModel):
-    datetime: datetime
-
-
 class ReserveWalksRequest(BaseModel):
-    slots: List[Slot]
+    slots: List[datetime]
+    location: str
 
 
 volunteer_router = APIRouter(prefix="/volunteer",
@@ -136,13 +133,16 @@ async def reserve_calendar(
 @volunteer_router.post("/animals/{animal_id}/reserve", status_code=HTTP_201_CREATED)
 async def reserve_walks(
         animal: animal_dependency,
-        slots: List[datetime],
+        request: ReserveWalksRequest,
         db: db_dependency,
         volunteer: volunteer_dependency,
 ):
     """
     The function to reserve a walk slots for specific animal by a volunteer.
     """
+
+    slots = request.slots
+    location = request.location
 
     def group_continuous_slots(max_gap: timedelta = timedelta(hours=1)):
         """
@@ -205,7 +205,7 @@ async def reserve_walks(
             user_id=volunteer.id,
             date=start_time,
             duration=duration,
-            location="Shelter grounds",
+            location=location,
         )
         db.add(new_walk)
 
