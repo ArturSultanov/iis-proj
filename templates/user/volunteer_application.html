@@ -1,93 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Volunteer Application</title>
-    <link rel="stylesheet" href="../../static/css/main.css">
-</head>
-<style>
+{% set title='volunteer application' %}
 
-    .main-container {
-        max-width: 1000px;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        text-align: center;
-    }
+{% extends 'base.html' %}
 
-    span {
-        font-size: 1.2em;
-        line-height: 1.6;
-        color: #555;
-        display: block;
-        margin-bottom: 20px;
-    }
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/volunteer_application.css') }}">
+{% endblock %}
 
-    form {
-        margin-top: 20px;
-    }
-
-    label {
-        font-size: 1.1em;
-        color: #333;
-    }
-
-    textarea {
-        width: 100%;
-        max-width: 950px;
-        padding: 10px;
-        font-size: 1em;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin-top: 10px;
-    }
-
-    .centered-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 20px;
-        padding: 20px;
-        border: 2px solid #ccc;
-        border-radius: 10px;
-    }
-
-    .rejected {
-        background-color: lightcoral;
-        color: white;
-        padding: 10px 20px;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    .accepted {
-        background-color: lightgreen;
-        color: white;
-        padding: 10px 20px;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    .pending {
-        background-color: orange;
-        color: white;
-        padding: 10px 20px;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    #description {
-        font-size: 1.1em;
-        color: #333;
-        margin-top: 15px;
-        text-align: center;
-        max-width: 800px;
-    }
-</style>
-
-<body>
-    <h1>Volunteer Application</h1>
+{% block content %}
     {% if not application %}
     <div class="main-container">
         <span>
@@ -116,21 +36,10 @@
         </div>
     </div>
     {% endif %}
-</body>
+{% endblock %}
 
+{% block scripts %}
 {% if not application %}
-<script>
-    document.getElementById('application_form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const formData = new FormData(this);
-        const response = await fetch('/user/volunteer_application', {
-            method: 'POST',
-            body: formData
-        });
-        if (response.ok) {
-            window.location.reload();
-        }
-    });
-</script>
+<script src="{{ url_for('static', path='js/volunteer/application.js') }}"></script>
 {% endif %}
-</html>
+{% endblock %}
