@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK
@@ -16,7 +15,7 @@ from app.utils import session_dependency, templates
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_):
     # create all tables if not exists
     create_all_tables()
     # create a session to add the admin user if not exists
@@ -33,13 +32,16 @@ async def lifespan(app: FastAPI):
         start_db.add(UsersOrm(username="vet", name="vet", password=hash_password("vet"), role=Role.vet))
     if not UsersOrm.get_user(start_db, "volunteer"):
         # add volunteer user with password "volunteer"
-        start_db.add(UsersOrm(username="volunteer", name="volunteer", password=hash_password("volunteer"), role=Role.volunteer))
+        start_db.add(
+            UsersOrm(username="volunteer", name="volunteer", password=hash_password("volunteer"), role=Role.volunteer))
     if not UsersOrm.get_user(start_db, "registered"):
         # add user registered with password "registered"
-        start_db.add(UsersOrm(username="registered", name="registered", password=hash_password("registered"), role=Role.registered))
+        start_db.add(UsersOrm(username="registered", name="registered", password=hash_password("registered"),
+                              role=Role.registered))
     start_db.commit()
     start_db.close()
     yield
+
 
 # Create the FastAPI app
 app = FastAPI(lifespan=lifespan)
@@ -56,12 +58,13 @@ app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="stati
 
 # Add middleware to the app
 app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"]
-    )
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 @app.get("/", status_code=HTTP_200_OK)
 async def index_page(request: Request, session: session_dependency):
@@ -71,13 +74,14 @@ async def index_page(request: Request, session: session_dependency):
                                           "user": session.user
                                       })
 
+
 @app.get("/animals", status_code=HTTP_200_OK)
 async def animals_page(request: Request, db: db_dependency, session: session_dependency, page: int = 1):
     animals_list = db.query(AnimalsOrm).all()
     # sort animals by hidden status, so hidden animals will be displayed at the end
     animals_list.sort(key=lambda x: x.hidden)
     # slice the list to display only the animals on the current page
-    display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
+    display_animals = animals_list[(page - 1) * settings.PAGE_SIZE:page * settings.PAGE_SIZE]
     pages = len(animals_list) // settings.PAGE_SIZE + 1
     if page > pages or page < 1:
         # if the page is out of range, redirect to the first page
@@ -91,12 +95,14 @@ async def animals_page(request: Request, db: db_dependency, session: session_dep
                                           "page": page
                                       })
 
+
 @app.get("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def animal_photo(animal_id: int, db: db_dependency):
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal or not animal.photo:
         return RedirectResponse(url="/static/no-image-available.jpg")
     return HTMLResponse(content=animal.photo, media_type="image/jpeg")
+
 
 @app.get("/animals/{animal_id}/profile")
 async def animal_profile(request: Request, animal_id: int, db: db_dependency, session: session_dependency):
@@ -110,8 +116,9 @@ async def animal_profile(request: Request, animal_id: int, db: db_dependency, se
                                           "animal": animal
                                       })
 
+
 @app.get("/dashboard")
-async def dashboard(request: Request, session: session_dependency):
+async def dashboard(session: session_dependency):
     if not session.user:
         return RedirectResponse(url="/")
     if session.user.is_admin:
@@ -125,5 +132,5 @@ async def dashboard(request: Request, session: session_dependency):
 
 
 @app.get("/favicon.ico")
-async def favicon(request: Request):
+async def favicon():
     return RedirectResponse(url="/static/favicon.ico")

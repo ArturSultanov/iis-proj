@@ -13,6 +13,7 @@ from app.utils import session_dependency, session_id_cookie, create_session, tem
 user_router = APIRouter(prefix="/user",
                         tags=["user"])
 
+
 # Form to register a new user
 class RegisterFormIn(BaseModel):
     name: str = Form(...)
@@ -23,6 +24,7 @@ class RegisterFormIn(BaseModel):
     def validate_password(self):
         if self.password != self.confirm_password:
             raise ValueError("Passwords do not match")
+
 
 # Form to login a user
 class LoginFormIn(BaseModel):
@@ -114,7 +116,8 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
             continue
         db.delete(other_session)
     db.commit()
-    response = JSONResponse(content={"message": f"Logged out from all devices {"except current" if keep_current else ""}"})
+    response = JSONResponse(
+        content={"message": f"Logged out from all devices {"except current" if keep_current else ""}"})
     if not keep_current:
         response.delete_cookie(key=session_id_cookie)
     return response
@@ -145,6 +148,7 @@ async def volunteer_application_page(request: Request, session: session_dependen
                                           "application": application
                                       })
 
+
 @user_router.post("/volunteer_application", status_code=status.HTTP_201_CREATED)
 async def volunteer_application(db: db_dependency, session: session_dependency, description: str = Form(...)):
     if not session:
@@ -171,7 +175,8 @@ async def change_password_page(request: Request, session: session_dependency):
 
 
 @user_router.post("/change_password", status_code=status.HTTP_200_OK)
-async def change_password(db: db_dependency, session: session_dependency, old_password: str = Form(...), new_password: str = Form(...), confirm_password: str = Form(...)):
+async def change_password(db: db_dependency, session: session_dependency, old_password: str = Form(...),
+                          new_password: str = Form(...), confirm_password: str = Form(...)):
     if not session:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in")
     if not verify_password(old_password, session.user.password):

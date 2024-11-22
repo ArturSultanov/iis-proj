@@ -3,10 +3,11 @@ from typing import List
 
 from fastapi import APIRouter, Request, HTTPException, Depends, Query
 from pydantic import BaseModel
-from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
+from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 
 from app.database import db_dependency, WalksOrm, WalkStatus, AnimalStatus
-from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency, session_dependency
+from app.utils import get_volunteer, volunteer_dependency, templates, animal_dependency, session_dependency, \
+    walk_dependency
 
 
 class ReserveWalksRequest(BaseModel):
@@ -36,61 +37,37 @@ async def staff_dashboard(request: Request, volunteer: volunteer_dependency, ses
 @volunteer_router.get("/history", status_code=HTTP_200_OK)
 async def volunteer_history(
         request: Request,
-        volunteer: volunteer_dependency,
-        db: db_dependency,
-        session: session_dependency
+        volunteer: volunteer_dependency
 ):
     """
     Returns the history of the walks for the current volunteer
     """
-    # Query walks associated with the volunteer
-    walks = (
-        db.query(WalksOrm)
-        .filter(WalksOrm.user_id == volunteer.id)
-        .order_by(WalksOrm.date.desc())
-        .all()
-    )
+    walks = volunteer.walks
 
-    walk_data = []
-    today = datetime.now()
-
-    for walk in walks:
-        can_cancel = (
-                walk.status in [WalkStatus.pending, WalkStatus.accepted]
-                and walk.date.date() > today.date()
-        )
-        walk_data.append({
-            "id": walk.id,
-            "animal_name": walk.animal.name,
-            "date": walk.date.strftime("%Y-%m-%d %H:%M"),
-            "duration": walk.duration,
-            "location": walk.location,
-            "status": walk.status.value,
-            "can_cancel": can_cancel,
-        })
+    walks.sort(key=lambda walk: walk.date, reverse=True)
 
     return templates.TemplateResponse(
         "volunteer/history.html",
         {
             "request": request,
-            "walks": walk_data,
-            "user": session.user
+            "walks": walks,
+            "now": datetime.now(),
+            "user": volunteer
         },
     )
 
 
 @volunteer_router.delete("/walks/{walk_id}/cancel", status_code=HTTP_200_OK)
 async def cancel_walk(
-        walk_id: int,
+        walk: walk_dependency,
         db: db_dependency,
         volunteer: volunteer_dependency,
 ):
     """
     Cancel the walk for the volunteer
     """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id, WalksOrm.user_id == volunteer.id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk not found.")
+    if walk.user_id != volunteer.id:
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="You are not authorized to cancel this walk.")
 
     today = datetime.now()
 
@@ -225,7 +202,7 @@ async def get_scheduled_walks(
     """
 
     if animal.status not in [AnimalStatus.available] or animal.hidden:
-        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is available.")
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="Animal is not available.")
 
     scheduled_walks = list(filter(
         lambda s_walk:

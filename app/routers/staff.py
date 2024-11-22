@@ -4,7 +4,6 @@ from typing import Annotated, Optional
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
-from sqlalchemy.orm import joinedload
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
@@ -12,11 +11,12 @@ from app.database import db_dependency, AnimalsOrm
 from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm, \
     WalkStatus, WalksOrm
 from app.utils import staff_dependency, templates, get_staff, application_status_to_int, animal_dependency, \
-    session_dependency
+    session_dependency, walk_dependency
 
 staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
                          dependencies=[Depends(get_staff)])
+
 
 # Form to add a new animal
 class AnimalForm(BaseModel):
@@ -39,7 +39,12 @@ class AnimalForm(BaseModel):
 
 @staff_router.get("/dashboard", status_code=HTTP_200_OK)
 async def staff_dashboard(request: Request, staff: staff_dependency, session: session_dependency):
-    return templates.TemplateResponse("staff/dashboard.html", {"request": request, "staff": staff, "user": session.user})
+    return templates.TemplateResponse("staff/dashboard.html",
+                                      {
+                                          "request": request,
+                                          "staff": staff,
+                                          "user": session.user
+                                      })
 
 
 @staff_router.post("/animals/new", status_code=HTTP_201_CREATED)
@@ -59,7 +64,12 @@ async def delete_animal(db: db_dependency, animal: animal_dependency):
 
 @staff_router.get("/animals/{animal_id}/edit", status_code=HTTP_200_OK)
 async def edit_animal_page(request: Request, animal: animal_dependency, session: session_dependency):
-    return templates.TemplateResponse("animal/edit_page.html", {"request": request, "animal": animal, "user": session.user})
+    return templates.TemplateResponse("animal/edit_page.html",
+                                      {
+                                          "request": request,
+                                          "animal": animal,
+                                          "user": session.user
+                                      })
 
 
 @staff_router.patch("/animals/{animal_id}/name", status_code=HTTP_200_OK)
@@ -112,11 +122,12 @@ async def hide_animal(db: db_dependency, animal: animal_dependency, hidden: bool
 
 
 @staff_router.get("/volunteer_applications")
-async def volunteer_applications(request: Request, session: session_dependency, db: db_dependency, limit: int = Query(10), page: int = Query(1)):
+async def volunteer_applications(request: Request, session: session_dependency, db: db_dependency,
+                                 limit: int = Query(10), page: int = Query(1)):
     applications_list = db.query(VolunteerApplicationsOrm).all()
     # sort by status, then by date, then by id
     applications_list.sort(key=lambda x: (application_status_to_int(x.status), x.date, x.id))
-    display_applications = applications_list[(page-1)*limit:page*limit]
+    display_applications = applications_list[(page - 1) * limit:page * limit]
     pages = len(applications_list) // limit + 1
     if page > pages or page < 1:
         return RedirectResponse(url="/volunteer_applications")
@@ -128,6 +139,7 @@ async def volunteer_applications(request: Request, session: session_dependency, 
                                           "page": page,
                                           "user": session.user
                                       })
+
 
 @staff_router.patch("/volunteer_applications/{application_id}", status_code=HTTP_200_OK)
 async def update_application_status(db: db_dependency, application_id: int, status: ApplicationStatus = Query(...)):
@@ -157,12 +169,17 @@ async def update_application_status(db: db_dependency, application_id: int, stat
 
 @staff_router.get("/new_request/{animal_id}", status_code=HTTP_200_OK)
 async def vet_request_page(request: Request, animal: animal_dependency, session: session_dependency):
-    return templates.TemplateResponse("animal/vet_request_page.html", {"request": request, "animal": animal, "user": session.user})
+    return templates.TemplateResponse("animal/vet_request_page.html",
+                                      {
+                                          "request": request,
+                                          "animal": animal,
+                                          "user": session.user
+                                      })
 
 
 @staff_router.post("/new_request/{animal_id}", status_code=HTTP_201_CREATED)
-async def create_vet_request(db: db_dependency, animal: animal_dependency, staff: staff_dependency, description: str = Form(...),
-):
+async def create_vet_request(db: db_dependency, animal: animal_dependency, staff: staff_dependency,
+                             description: str = Form(...)):
     new_request = VetRequestOrm(
         animal_id=animal.id,
         user_id=staff.id,
@@ -185,135 +202,37 @@ async def walk_requests_page(
     """
     Displays the walk requests page with filtering.
     """
-    # Build the base query with eager loading
-    query = db.query(WalksOrm).options(
-        joinedload(WalksOrm.animal),
-        joinedload(WalksOrm.user)
-    ).filter(WalksOrm.status != WalkStatus.finished)
+
+    walks = db.query(WalksOrm).all()
 
     if status_filter:
-        query = query.filter(WalksOrm.status == status_filter)
+        walks = list(filter(lambda walk: walk.status == status_filter, walks))
 
-    walks = query.order_by(WalksOrm.date.desc()).all()
+    status_to_int = lambda status: {WalkStatus.started: 0, WalkStatus.accepted: 1, WalkStatus.pending: 2}.get(status, 4)
+    walk_sort = lambda walk: (status_to_int(walk.status), walk.date, walk.id)
 
-    walk_data = [
-        {
-            "id": walk.id,
-            "animal_name": walk.animal.name,
-            "volunteer_name": walk.user.name,
-            "date": walk.date.strftime("%Y-%m-%d %H:%M"),
-            "duration": walk.duration,
-            "status": walk.status.value,
-        }
-        for walk in walks
-    ]
-    # TODO: reformat the walk_data
-    return templates.TemplateResponse(
-        "staff/walk_requests.html",
-        {"request": request, "user": session.user, "walks": walk_data, "status_filter": status_filter.value if status_filter else None},
-    )
+    walks.sort(key=walk_sort)
+
+    return templates.TemplateResponse("staff/walk_requests.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "walks": walks,
+                                          "status_filter": status_filter.value if status_filter else None
+                                      })
 
 
-@staff_router.post("/walk_requests/{walk_id}/accept", status_code=HTTP_200_OK)
-async def accept_walk_request(
-    walk_id: int,
-    db: db_dependency,
+@staff_router.patch("/walk_requests/{walk_id}/status", status_code=HTTP_200_OK)
+async def update_walk_status(
+        walk: walk_dependency,
+        db: db_dependency,
+        status: WalkStatus = Query(...),
 ):
     """
-    Accepts a walk request.
+    Updates the status of a walk request.
     """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
 
-    if walk.status != WalkStatus.pending:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot accept this walk request.")
-
-    walk.status = WalkStatus.accepted
+    walk.status = status
     db.commit()
 
-    return {"message": "Walk request accepted successfully."}
-
-
-@staff_router.post("/walk_requests/{walk_id}/reject", status_code=HTTP_200_OK)
-async def reject_walk_request(
-    walk_id: int,
-    db: db_dependency,
-):
-    """
-    Rejects a walk request.
-    """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
-
-    if walk.status != WalkStatus.pending:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot reject this walk request.")
-
-    walk.status = WalkStatus.rejected
-    db.commit()
-
-    return {"message": "Walk request rejected successfully."}
-
-
-@staff_router.post("/walk_requests/{walk_id}/start", status_code=HTTP_200_OK)
-async def finish_walk_request(
-    walk_id: int,
-    db: db_dependency,
-):
-    """
-    Rejects a walk request.
-    """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
-
-    if walk.status != WalkStatus.accepted:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot accept this walk request.")
-
-    walk.status = WalkStatus.started
-    db.commit()
-
-    return {"message": "Walk request rejected successfully."}
-
-
-@staff_router.post("/walk_requests/{walk_id}/finish", status_code=HTTP_200_OK)
-async def finish_walk_request(
-    walk_id: int,
-    db: db_dependency,
-):
-    """
-    Rejects a walk request.
-    """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
-
-    if walk.status != WalkStatus.started:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot finish this walk request.")
-
-    walk.status = WalkStatus.finished
-    db.commit()
-
-    return {"message": "Walk request rejected successfully."}
-
-
-@staff_router.post("/walk_requests/{walk_id}/cancel", status_code=HTTP_200_OK)
-async def cancel_walk_request(
-    walk_id: int,
-    db: db_dependency,
-):
-    """
-    Rejects a walk request.
-    """
-    walk = db.query(WalksOrm).filter(WalksOrm.id == walk_id).first()
-    if not walk:
-        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Walk request not found.")
-
-    if walk.status != WalkStatus.accepted:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Cannot cancel this walk request.")
-
-    walk.status = WalkStatus.cancelled
-    db.commit()
-
-    return {"message": "Walk request rejected successfully."}
+    return {"message": "Walk request status updated successfully."}

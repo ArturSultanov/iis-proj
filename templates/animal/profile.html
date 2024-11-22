@@ -1,5 +1,4 @@
-<!-- templates/animals/animal_profile.html -->
-{% set title='Animal profile' %}
+{% set title='animal profile' %}
 {% extends 'base.html' %}
 {% block title %}
     {{ animal.name }}
@@ -11,11 +10,6 @@
 
 {% block content %}
     <div class="profile">
-        <header class="header-inline">
-            <nav>
-                <a href="/animals" class="link"><< ANIMALS</a>
-            </nav>
-        </header>
         <h1>{{ animal.name }}</h1>
         <div class="photo">
             <img src="/animals/{{ animal.id }}/photo" alt="{{ animal.name }}" width="300">

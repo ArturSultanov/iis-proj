@@ -22,44 +22,39 @@ document.addEventListener('click', function(event) {
 
     if (target.classList.contains('action-button')) {
         const walkId = target.dataset.walkId;
-        let action = '';
+        let status = '';
 
         if (target.classList.contains('accept-button')) {
-            action = 'accept';
+            status = 'accepted';
         } else if (target.classList.contains('reject-button')) {
-            action = 'reject';
+            status = 'rejected';
         } else if (target.classList.contains('start-button')) {
-            action = 'start';
+            status = 'started';
         } else if (target.classList.contains('finish-button')) {
-            action = 'finish';
+            status = 'finished';
         } else if (target.classList.contains('cancel-button')) {
-            action = 'cancel';
+            status = 'cancelled';
         }
 
-        if (action) {
-            const confirmAction = confirm(`Are you sure you want to ${action} this walk request?`);
-
-            if (confirmAction) {
-                fetch(`/staff/walk_requests/${walkId}/${action}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        response.json().then(data => {
-                            alert(`Error: ${data.detail}`);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error ${action}ing walk request:`, error);
-                    alert('An error occurred.');
-                });
-            }
+        if (status) {
+            fetch(`/staff/walk_requests/${walkId}/status?status=${status}`, {
+                method: 'PATCH'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    // todo
+                    response.json().then(data => {
+                        alert(`Error: ${data.detail}`);
+                    });
+                }
+            })
+            .catch(error => {
+                // todo
+                console.error(`Error ${action}ing walk request:`, error);
+                alert('An error occurred.');
+            });
         }
     }
 });

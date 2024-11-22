@@ -42,3 +42,12 @@
     cursor: not-allowed;
 }
 
+.location-selector-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    min-width: 250px;
+}
+

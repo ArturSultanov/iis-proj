@@ -6,14 +6,6 @@
 {% endblock %}
 
 {% block content %}
-    <header>
-        <h1>Walks for {{ animal.name | upper }}</h1>
-        <div>
-            <a href="/volunteer/dashboard" class="link">Back to Dashboard</a>
-            <a href="/animals/{{ animal.id }}/profile" class="link">Back to Animal Profile</a>
-        </div>
-    </header>
-
     <div class="calendar-controls">
         <button id="prev-week">Previous Week</button>
         <span id="week-dates"></span>
@@ -44,7 +36,7 @@
     </div>
 
     <div class="location-selector-container">
-        <label for="location">Select Location:</label>
+        <label for="location">Location:</label>
         <select id="location">
             <option value="Shelter">Shelter</option>
             <option value="Park">Park</option>

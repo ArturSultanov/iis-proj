@@ -24,5 +24,6 @@ class Settings(BaseSettings):
     # Get data from .env file, if it is not found, get it from .env.template
     model_config = SettingsConfigDict(env_file=(".env.template", ".env"))
 
+
 # Settings instance to get .env values
 settings = Settings()

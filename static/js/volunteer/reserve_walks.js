@@ -113,7 +113,8 @@ const handleSlotClick = (event) => {
 /** Event handler for confirming reservation */
 const confirmReservation = () => {
     if (selectedSlots.size === 0) {
-        alert('No slots selected.');
+        // todo fix this alert
+        // alert('No slots selected.');
         return;
     }
 
@@ -136,11 +137,13 @@ const confirmReservation = () => {
         }),
     }).then(response => {
         if (response.ok) {
-            alert('Reservation successful!');
+            // todo fix this alert
+            // alert('Reservation successful!');
             window.location.href = `/volunteer/history`;
         } else {
             response.json().then(data => {
-                alert(`Failed to reserve walks: ${data.detail}`);
+                // todo fix this alert
+                // alert(`Failed to reserve walks: ${data.detail}`);
             });
         }
     });

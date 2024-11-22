@@ -9,6 +9,7 @@ admin_router = APIRouter(prefix="/admin",
                          tags=["admin"],
                          dependencies=[Depends(get_admin)])
 
+
 # Validation function to check if the user can be modified
 def validate_user_operation(user: UsersOrm, admin: UsersOrm):
     if not user:

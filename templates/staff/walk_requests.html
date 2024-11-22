@@ -1,16 +1,12 @@
-{% set title='Walk Requests' %}
+{% set title='walk requests' %}
 {% extends 'base.html' %}
 
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/walk_requests.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
 {% endblock %}
 
 {% block content %}
-    <header>
-        <h1>Walk Requests</h1>
-        <a href="/staff/dashboard" class="link">Back to Dashboard</a>
-    </header>
-
     <div class="filter-container">
         <label class="filter-label" for="status-filter">Filter by Status:</label>
         <select id="status-filter" name="status-filter">
@@ -39,19 +35,19 @@
             <tbody>
                 {% for walk in walks %}
                 <tr>
-                    <td>{{ walk.animal_name }}</td>
-                    <td>{{ walk.volunteer_name }}</td>
+                    <td>{{ walk.animal.name }}</td>
+                    <td>{{ walk.user.name }}</td>
                     <td>{{ walk.date }}</td>
                     <td>{{ walk.duration }}</td>
-                    <td>{{ walk.status.capitalize() }}</td>
+                    <td>{{ walk.status.value | capitalize }}</td>
                     <td>
-                        {% if walk.status == 'pending' %}
+                        {% if walk.status.value == 'pending' %}
                             <button class="action-button accept-button" data-walk-id="{{ walk.id }}">Accept</button>
                             <button class="action-button reject-button" data-walk-id="{{ walk.id }}">Reject</button>
-                        {% elif walk.status == 'accepted' %}
+                        {% elif walk.status.value == 'accepted' %}
                             <button class="action-button start-button" data-walk-id="{{ walk.id }}">Start</button>
                             <button class="action-button cancel-button" data-walk-id="{{ walk.id }}">Cancel</button>
-                        {% elif walk.status == 'started' %}
+                        {% elif walk.status.value == 'started' %}
                             <button class="action-button finish-button" data-walk-id="{{ walk.id }}">Finish</button>
                         {% else %}
                             <span>No actions available</span>
