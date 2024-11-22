@@ -1,10 +1,41 @@
-{% set title = "home" %}
+{% set title = "Home" %}
 {% extends 'base.html' %}
 {% block content %}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec pur
-us. Donec euismod, nunc id lacinia ultricies, nunc nunc fermentum nunc,
-nec fermentum nunc nunc fermentum nunc, nec fermentum nunc nunc
-fermentum nunc, nec fermentum nunc nunc fermentum nunc, nec fermentum
-nunc nunc fermentum nunc, nec fermentum nunc nunc fermentum nunc, nec
-fermentum nunc nunc fermentum nunc, nec fermentum nunc nunc fermentum
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }} - Animal Shelter</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/index.css') }}">
+</head>
+<body>
+    <div class="container">
+        <section id="header">
+            <h1>ANIMAL SHELTER</h1>
+        </section>
+    </div>
+
+    <div class="container">
+        <section id="book">
+            <h2>Meet and take your new friend for a walk!</h2>
+            <img src="{{ url_for('static', path='cat.jpg') }}" alt="Cute Cat">
+            <a href="/animals" class="link">Check out our animals</a>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="about">
+                <h3>About Us</h3>
+                <p>Our shelter is dedicated to providing a loving home to animals in need. We rescue, rehabilitate, and take care of cats, dogs, and other pets.</p>
+            </div>
+            <div class="contact">
+                <h3>Contact</h3>
+                <p>Email: info@animalshelter.com</p>
+                <p>Phone: 123-456-7890</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
 {% endblock %}
