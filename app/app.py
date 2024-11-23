@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -68,6 +69,9 @@ app.add_middleware(
 
 @app.exception_handler(SQLAlchemyError)
 async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
+    # Make a task to terminate the app after 30 seconds
+    os.system("sleep 30 && kill -9 " + str(os.getpid()) + " &")
+    # Return a response with the error
     return templates.TemplateResponse("database_error.html",
                                         {
                                             "request": request,
