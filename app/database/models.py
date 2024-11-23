@@ -201,6 +201,20 @@ class MedicalHistoriesOrm(Base):
         relationship("TreatmentsOrm", back_populates="medical_history", cascade="all, delete"))
     vaccinations: Mapped[list["VaccinationsOrm"]] = (
         relationship("VaccinationsOrm", back_populates="medical_history", cascade="all, delete"))
+    notes: Mapped[list["MedicalHistoryNotesOrm"]] = (
+        relationship("MedicalHistoryNotesOrm", back_populates="medical_history", cascade="all, delete"))
+
+
+class MedicalHistoryNotesOrm(Base):
+    __tablename__ = 'medical_history_notes'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'),
+                                                    nullable=False)  # todo cascade delete
+    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    description: Mapped[Str2048] = mapped_column()
+
+    medical_history: Mapped["MedicalHistoriesOrm"] = relationship("MedicalHistoriesOrm", back_populates="notes")
 
 
 class TreatmentsOrm(Base):

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK
@@ -65,6 +66,13 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
+    return templates.TemplateResponse("database_error.html",
+                                        {
+                                            "request": request,
+                                            "error": str(exc)
+                                        })
 
 @app.get("/", status_code=HTTP_200_OK)
 async def index_page(request: Request, session: session_dependency):
