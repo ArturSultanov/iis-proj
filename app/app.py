@@ -67,16 +67,18 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+
 @app.exception_handler(SQLAlchemyError)
 async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
     # Make a task to terminate the app after 30 seconds
     os.system("sleep 30 && kill -9 " + str(os.getpid()) + " &")
     # Return a response with the error
     return templates.TemplateResponse("database_error.html",
-                                        {
-                                            "request": request,
-                                            "error": str(exc)
-                                        })
+                                      {
+                                          "request": request,
+                                          "error": str(exc)
+                                      })
+
 
 @app.get("/", status_code=HTTP_200_OK)
 async def index_page(request: Request, session: session_dependency):

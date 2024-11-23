@@ -1,8 +1,8 @@
 import io
 from datetime import datetime, timezone
 from typing import Annotated, Optional
-from PIL import Image
 
+from PIL import Image
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
 from pydantic import BaseModel
@@ -19,6 +19,7 @@ staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
                          dependencies=[Depends(get_staff)])
 
+
 def compress_photo(photo: bytes):
     """
     Compresses a photo to a smaller size.
@@ -28,6 +29,7 @@ def compress_photo(photo: bytes):
     image_bytes = io.BytesIO()
     image.save(image_bytes, format="JPEG", quality=70)
     return image_bytes.getvalue()
+
 
 # Form to add a new animal
 class AnimalForm(BaseModel):
@@ -46,7 +48,6 @@ class AnimalForm(BaseModel):
             "description": self.description,
             "photo": compress_photo(self.photo.file.read()) if self.photo else None
         }
-
 
 
 @staff_router.get("/dashboard", status_code=HTTP_200_OK)
@@ -249,6 +250,7 @@ async def update_walk_status(
 
     return {"message": "Walk request status updated successfully."}
 
+
 @staff_router.get("/adoption_requests", status_code=HTTP_200_OK)
 async def adoption_requests_page(
         request: Request,
@@ -265,7 +267,8 @@ async def adoption_requests_page(
     if status_filter:
         adoption_requests = list(filter(lambda request: request.status == status_filter, adoption_requests))
 
-    status_to_int = lambda status: {ApplicationStatus.pending: 0, ApplicationStatus.accepted: 1, ApplicationStatus.rejected: 2}.get(status, 4)
+    status_to_int = lambda status: {ApplicationStatus.pending: 0, ApplicationStatus.accepted: 1,
+                                    ApplicationStatus.rejected: 2}.get(status, 4)
     request_sort = lambda request: (status_to_int(request.status), request.date, request.id)
 
     adoption_requests.sort(key=request_sort)

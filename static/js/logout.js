@@ -14,8 +14,8 @@ for (const logout_btn of logout_btns) {
 }
 
 for (const logout_all_btn of logout_all_btns) {
-    const keep_logged_in = document.getElementById('keep_this').checked;
     logout_all_btn.addEventListener('click', async function() {
+        const keep_logged_in = document.getElementById('keep_this').checked;
         const response = await fetch(`/user/logout/all?keep_current=${keep_logged_in}`, {
             method: 'DELETE',
         });

@@ -1,10 +1,15 @@
 # Create .venv and install dependencies
-python3 -m venv .venv
+
+sudo apt install python3.12-venv
+
+python3.12 -m venv .venv
 
 source .venv/bin/activate
 
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 
 deactivate
+
+./setup_mysql.sh
 
 ./start.sh

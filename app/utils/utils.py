@@ -167,8 +167,10 @@ def get_vet_request(request_id: int, db: db_dependency) -> VetRequestOrm:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Request not found")
     return vet_request
 
+
 # This is a dependency that will be used to get the animal by id
 animal_dependency = typingAnnotated[AnimalsOrm, Depends(get_animal)]
+
 
 def get_adoption_request(session: session_dependency, animal: animal_dependency) -> AdoptionRequestsOrm | None:
     if not session:

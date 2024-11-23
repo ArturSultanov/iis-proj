@@ -186,6 +186,7 @@ async def change_password(db: db_dependency, session: session_dependency, old_pa
     db.commit()
     return {"message": "Password changed"}
 
+
 @user_router.get("/adoptions", status_code=status.HTTP_200_OK)
 async def adoptions_page(request: Request, session: session_dependency):
     if not session:
@@ -200,6 +201,7 @@ async def adoptions_page(request: Request, session: session_dependency):
                                           "user": session.user,
                                           "adoptions": adoption_requests
                                       })
+
 
 @user_router.get("/adopt/{animal_id}", status_code=status.HTTP_200_OK)
 async def adopt_animal_page(request: Request,
@@ -216,9 +218,11 @@ async def adopt_animal_page(request: Request,
                                           "animal": animal
                                       })
 
+
 class AdoptionRequestForm(BaseModel):
     animal_id: int
     message: str
+
 
 @user_router.post("/adoptions/request", status_code=status.HTTP_201_CREATED)
 async def adoption_request(db: db_dependency, session: session_dependency, form: AdoptionRequestForm):
