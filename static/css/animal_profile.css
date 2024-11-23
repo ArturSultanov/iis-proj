@@ -80,3 +80,8 @@ img {
     transition: background-color 0.2s;
     background-color: dimgray;
 }
+
+.rsv-btn, .show-history-btn{
+    background-color: #00a9e0;
+    width: 300px;
+}

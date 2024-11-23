@@ -25,7 +25,8 @@ async def admin_page(request: Request, admin: admin_dependency):
     return templates.TemplateResponse("admin/dashboard.html",
                                       {
                                           "request": request,
-                                          "admin": admin
+                                          "admin": admin,
+                                          "user": admin
                                       })
 
 
@@ -36,6 +37,7 @@ async def users_page(request: Request, db: db_dependency, admin: admin_dependenc
                                       {
                                           "request": request,
                                           "admin": admin,
+                                          "user": admin,
                                           "users": users,
                                           "roles": Role.get_roles()
                                       })

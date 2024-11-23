@@ -30,7 +30,7 @@
 {% endif %}
 {% set ns = namespace(found=0) %}
 {% if animals %}
-<table>
+<table style="min-width: 1000px">
     <thead>
     <tr>
         <th>Name</th>
@@ -60,11 +60,11 @@
 {% if pages > 1 %}
 <div>
     {% if page > 1 %}
-    <a href="/animals?page={{ page - 1 }}" id="prev_page">Prev</a>
+    <a href="/animals?page={{ page - 1 }}" class="link" id="prev_page">Prev</a>
     {% endif %}
     <span>Page {{ page }} of {{ pages }}</span>
     {% if page < pages %}
-    <a href="/animals?page={{ page + 1 }}" id="next_page">Next</a>
+    <a href="/animals?page={{ page + 1 }}" class="link" id="next_page">Next</a>
     {% endif %}
 </div>
 {% endif %}

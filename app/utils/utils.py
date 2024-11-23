@@ -9,7 +9,7 @@ from starlette.status import HTTP_403_FORBIDDEN, HTTP_303_SEE_OTHER, HTTP_400_BA
 from starlette.templating import Jinja2Templates
 
 from app.config import settings
-from app.database import UsersOrm, db_dependency, SessionsOrm
+from app.database import UsersOrm, db_dependency, SessionsOrm, AdoptionRequestsOrm
 from app.database.models import ApplicationStatus, AnimalsOrm, WalksOrm, VetRequestOrm
 
 # This is default session duration
@@ -167,9 +167,15 @@ def get_vet_request(request_id: int, db: db_dependency) -> VetRequestOrm:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="Request not found")
     return vet_request
 
-
-#
+# This is a dependency that will be used to get the animal by id
 animal_dependency = typingAnnotated[AnimalsOrm, Depends(get_animal)]
+
+def get_adoption_request(session: session_dependency, animal: animal_dependency) -> AdoptionRequestsOrm | None:
+    if not session:
+        raise need_login_exception
+    return next(filter(lambda x: x.animal_id == animal.id, session.user.adoption_requests), None)
+
+
 # This is a dependency that will be used to get the admin user from the session
 admin_dependency = typingAnnotated[UsersOrm, Depends(get_admin)]
 # This is a dependency that will be used to get the staff user from the session
@@ -182,6 +188,8 @@ volunteer_dependency = typingAnnotated[UsersOrm, Depends(get_volunteer)]
 walk_dependency = typingAnnotated[WalksOrm, Depends(get_walk)]
 # This is a dependency that will be used to get the vet request by id
 vet_request_dependency = typingAnnotated[VetRequestOrm, Depends(get_vet_request)]
+# This is a dependency that will be used to get the adoption request
+user_animal_adoption_dependency = typingAnnotated[AdoptionRequestsOrm | None, Depends(get_adoption_request)]
 
 # This is the instance of the Jinja2Templates class that will be used to render html templates
 templates = Jinja2Templates(directory=settings.APP_TEMPLATES_PATH)

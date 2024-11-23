@@ -1,0 +1,39 @@
+{% set title='my adoptions' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
+{% endblock %}
+{% block content %}
+    {% if adoptions | length != 0 %}
+        <table>
+            <thead>
+            <tr>
+                <th>Animal</th>
+                <th>Request date</th>
+                <th>Adoption status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for adoption in adoptions %}
+                <tr animal_id="{{ adoption.animal.id }}" style="height: 55px">
+                    <td>{{ adoption.animal.name }}</td>
+                    <td>{{ adoption.date }}</td>
+                    <td><span class="{{ adoption.status.value }}">{{ adoption.status.value }}</span></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No adoptions found.</p>
+    {% endif %}
+{% endblock %}
+{% block scripts %}
+    <script>
+        document.querySelectorAll('tr').forEach((tr) => {
+            tr.addEventListener('click', (e) => {
+                const animalId = tr.getAttribute('animal_id');
+                window.location.href = `/animals/${animalId}/profile`;
+            });
+        });
+    </script>
+{% endblock %}

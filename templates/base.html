@@ -19,6 +19,16 @@
 </body>
 <!-- Scripts -->
 <!-- Default scripts -->
+<script>
+    window.onpageshow = function(event) {
+        const flag = localStorage.getItem('gotByBack');
+        if (flag === 'true') {
+            localStorage.removeItem('gotByBack');
+            location.reload();
+            console.log('reloaded');
+        }
+    };
+</script>
 {% if user %}
 <script src="{{ url_for('static', path='js/logout.js') }}"></script>
 {% endif %}

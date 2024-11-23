@@ -10,6 +10,12 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         confirm_password: document.getElementById('confirm_password').value
     };
 
+    // if password or username is empty
+    if (formData.password === '' || formData.username === '') {
+        document.getElementById('errorMessages').textContent = 'Username and password cannot be empty';
+        return;
+    }
+
     // Send data as JSON
     const response = await fetch('signup', {
         method: 'POST',
@@ -34,7 +40,9 @@ document.getElementById('registerForm').addEventListener('input', function() {
     const password = document.getElementById('password').value;
     const confirm_password = document.getElementById('confirm_password').value;
     document.getElementById('errorMessages').textContent = '';
-    if (password !== confirm_password) {
+    if (password.length < 6) {
+        document.getElementById('errorMessages').textContent = 'Password must be at least 6 characters';
+    } else if (password !== confirm_password) {
         document.getElementById('errorMessages').textContent = 'Passwords do not match';
     }
 });

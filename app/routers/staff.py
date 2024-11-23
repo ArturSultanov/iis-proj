@@ -7,9 +7,9 @@ from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 
-from app.database import db_dependency, AnimalsOrm
+from app.database import db_dependency, AnimalsOrm, AdoptionStatus, AnimalStatus
 from app.database.models import VolunteerApplicationsOrm, ApplicationStatus, Role, VetRequestStatus, VetRequestOrm, \
-    WalkStatus, WalksOrm
+    WalkStatus, WalksOrm, AdoptionRequestsOrm
 from app.utils import staff_dependency, templates, get_staff, application_status_to_int, animal_dependency, \
     session_dependency, walk_dependency
 
@@ -236,3 +236,57 @@ async def update_walk_status(
     db.commit()
 
     return {"message": "Walk request status updated successfully."}
+
+@staff_router.get("/adoption_requests", status_code=HTTP_200_OK)
+async def adoption_requests_page(
+        request: Request,
+        db: db_dependency,
+        session: session_dependency,
+        status_filter: Optional[ApplicationStatus] = Query(default=None),
+):
+    """
+    Displays the adoption requests page with filtering.
+    """
+
+    adoption_requests = db.query(AdoptionRequestsOrm).all()
+
+    if status_filter:
+        adoption_requests = list(filter(lambda request: request.status == status_filter, adoption_requests))
+
+    status_to_int = lambda status: {ApplicationStatus.pending: 0, ApplicationStatus.accepted: 1, ApplicationStatus.rejected: 2}.get(status, 4)
+    request_sort = lambda request: (status_to_int(request.status), request.date, request.id)
+
+    adoption_requests.sort(key=request_sort)
+
+    return templates.TemplateResponse("staff/adoption_requests.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "adoption_requests": adoption_requests,
+                                          "status_filter": status_filter.value if status_filter else None
+                                      })
+
+
+@staff_router.patch("/adoption_requests/{request_id}/status", status_code=HTTP_200_OK)
+async def update_adoption_request_status(
+        request_id: int,
+        db: db_dependency,
+        status: AdoptionStatus = Query(...),
+):
+    """
+    Updates the status of an adoption request.
+    """
+    request = db.query(AdoptionRequestsOrm).filter(AdoptionRequestsOrm.id == request_id).first()
+    if status == AdoptionStatus.accepted:
+        if request.animal.status == AnimalStatus.adopted:
+            raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Animal already adopted")
+        request.animal.hidden = True
+        request.animal.status = AnimalStatus.adopted
+        # reject all other requests for the same animal
+        for req in request.animal.adoption_requests:
+            if req.id != request_id:
+                req.status = AdoptionStatus.rejected
+    request.status = status
+    db.commit()
+
+    return {"message": "Adoption request status updated successfully."}

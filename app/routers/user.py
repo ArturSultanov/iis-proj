@@ -6,9 +6,10 @@ from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 
 from app.database import db_dependency, UsersOrm
-from app.database.models import VolunteerApplicationsOrm
+from app.database.models import VolunteerApplicationsOrm, AdoptionRequestsOrm
 from app.password import hash_password, verify_password
-from app.utils import session_dependency, session_id_cookie, create_session, templates
+from app.utils import session_dependency, session_id_cookie, create_session, templates, animal_dependency, \
+    user_animal_adoption_dependency
 
 user_router = APIRouter(prefix="/user",
                         tags=["user"])
@@ -26,7 +27,7 @@ class RegisterFormIn(BaseModel):
             raise ValueError("Passwords do not match")
 
 
-# Form to login a user
+# Form for user login
 class LoginFormIn(BaseModel):
     username: str
     password: str
@@ -106,8 +107,6 @@ async def logout_user(db: db_dependency, session: session_dependency):
 
 @user_router.delete("/logout/all", status_code=status.HTTP_200_OK)
 async def logout_all(db: db_dependency, session: session_dependency, keep_current: bool = False):
-    if keep_current:
-        print("Keeping current session")
     if not session:
         return {"message": "Not logged in"}
     # Delete all user's sessions except the current session if keep_current is True
@@ -117,7 +116,7 @@ async def logout_all(db: db_dependency, session: session_dependency, keep_curren
         db.delete(other_session)
     db.commit()
     response = JSONResponse(
-        content={"message": f"Logged out from all devices {"except current" if keep_current else ""}"})
+        content={"message": f"Logged out from all devices{" except current." if keep_current else "."}"})
     if not keep_current:
         response.delete_cookie(key=session_id_cookie)
     return response
@@ -186,3 +185,57 @@ async def change_password(db: db_dependency, session: session_dependency, old_pa
     session.user.password = hash_password(new_password)
     db.commit()
     return {"message": "Password changed"}
+
+@user_router.get("/adoptions", status_code=status.HTTP_200_OK)
+async def adoptions_page(request: Request, session: session_dependency):
+    if not session:
+        return RedirectResponse(url="/user/signin")
+
+    user = session.user
+    adoption_requests = user.adoption_requests
+
+    return templates.TemplateResponse("user/adoptions.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "adoptions": adoption_requests
+                                      })
+
+@user_router.get("/adopt/{animal_id}", status_code=status.HTTP_200_OK)
+async def adopt_animal_page(request: Request,
+                            adopt_request: user_animal_adoption_dependency,
+                            session: session_dependency,
+                            animal: animal_dependency):
+    if not session:
+        return RedirectResponse(url="/user/signin")
+    return templates.TemplateResponse("animal/adoption_form.html",
+                                      {
+                                          "request": request,
+                                          "user": session.user,
+                                          "adopt_request": adopt_request,
+                                          "animal": animal
+                                      })
+
+class AdoptionRequestForm(BaseModel):
+    animal_id: int
+    message: str
+
+@user_router.post("/adoptions/request", status_code=status.HTTP_201_CREATED)
+async def adoption_request(db: db_dependency, session: session_dependency, form: AdoptionRequestForm):
+    if not session:
+        return RedirectResponse(url="/user/signin")
+
+    existed_request = next(filter(lambda x: x.animal_id == form.animal_id, session.user.adoption_requests), None)
+
+    if existed_request:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Request already submitted")
+
+    user = session.user
+    new_request = AdoptionRequestsOrm()
+    new_request.user_id = user.id
+    new_request.animal_id = form.animal_id
+    new_request.message = form.message
+    new_request.date = datetime.now()
+    db.add(new_request)
+    db.commit()
+    return {"message": "Adoption request submitted", "request_id": new_request.id}

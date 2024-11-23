@@ -65,7 +65,7 @@ class UsersOrm(Base):
 
     @property
     def is_registered(self) -> bool:
-        return self.role == Role.registered or self.is_admin  # todo remove admin
+        return self.role == Role.registered or self.is_admin
 
     def add_session(self, db: Session, session_id: UUID, expiration: datetime) -> UUID:
         session = SessionsOrm(user_id=self.id, token=session_id, expiration=expiration)
@@ -100,7 +100,7 @@ class SessionsOrm(Base):
     __tablename__ = 'sessions'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)  # todo cascade delete
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     token: Mapped[UUID] = mapped_column(unique=True, nullable=False)
     expiration: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
@@ -121,10 +121,11 @@ class AdoptionRequestsOrm(Base):
     __tablename__ = 'adoption_requests'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)  # todo cascade delete
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)  # todo cascade delete
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[AdoptionStatus] = mapped_column(default=AdoptionStatus.pending)
+    message: Mapped[Str2048] = mapped_column(nullable=True)
 
     user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="adoption_requests")
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="adoption_requests")
@@ -176,22 +177,22 @@ class WalksOrm(Base):
     __tablename__ = 'walks'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)  # todo cascade delete
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)  # todo cascade delete
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     duration: Mapped[int] = mapped_column(nullable=False)
     location: Mapped[Str256] = mapped_column()
     status: Mapped[WalkStatus] = mapped_column(default=WalkStatus.pending)
 
     animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="scheduled_walks")
-    user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="walks")  # New Relationship
+    user: Mapped["UsersOrm"] = relationship("UsersOrm", back_populates="walks")
 
 
 class MedicalHistoriesOrm(Base):
     __tablename__ = 'medical_histories'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)  # todo cascade delete
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
     start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
@@ -210,7 +211,7 @@ class MedicalHistoryNotesOrm(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'),
-                                                    nullable=False)  # todo cascade delete
+                                                    nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
@@ -255,11 +256,11 @@ class VetRequestOrm(Base):
     __tablename__ = 'vet_requests'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)  # todo cascade delete
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)  # todo cascade delete
+    animal_id: Mapped[int] = mapped_column(ForeignKey('animals.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
     status: Mapped[VetRequestStatus] = mapped_column(default=VetRequestStatus.pending)
 
-    animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm")
+    animal: Mapped["AnimalsOrm"] = relationship("AnimalsOrm", back_populates="vet_requests")
     user: Mapped["UsersOrm"] = relationship("UsersOrm")

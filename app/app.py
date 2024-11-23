@@ -46,7 +46,7 @@ async def lifespan(_):
 
 
 # Create the FastAPI app
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 # Add routers to the app
 app.include_router(user_router)
@@ -141,6 +141,7 @@ async def dashboard(session: session_dependency):
         return RedirectResponse(url="/vet/dashboard")
     if session.user.is_volunteer:
         return RedirectResponse(url="/volunteer/dashboard")
+    return RedirectResponse(url="/")
 
 
 @app.get("/favicon.ico")

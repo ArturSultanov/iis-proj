@@ -1,0 +1,79 @@
+{% set title='adoption requests' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/application_card.css') }}">
+{% endblock %}
+{% block content %}
+    {% if adoption_requests | length != 0 %}
+        <table>
+            <thead>
+            <tr>
+                <th>Animal</th>
+                <th>Request date</th>
+                <th>Requester</th>
+                <th>Message</th>
+                <th>Request status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for request in adoption_requests %}
+                <tr style="height: 55px">
+                    <td><a href="/animals/{{ request.animal.id  }}/profile" class="link">{{ request.animal.name }}</a></td>
+                    <td>{{ request.date }}</td>
+                    <td>{{ request.user.name }}</td>
+                    <td>{{ request.message }}</td>
+                    <td><span class="{{ request.status.value }}">{{ request.status.value }}</span></td>
+                    {% if request.status.value == 'pending' and request.animal.status.value == 'available' %}
+                        <td style="display: flex">
+                        <button class="staff-btn approve-btn" request_id="{{ request.id }}">Approve</button>
+                        <button class="staff-btn reject-btn" request_id="{{ request.id }}">Reject</button>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No adoption requests found.</p>
+    {% endif %}
+{% endblock %}
+{% block scripts %}
+    <script>
+    // /adoption_requests/{request_id}/status
+
+    const approveBtns = document.querySelectorAll('.approve-btn');
+    const rejectBtns = document.querySelectorAll('.reject-btn');
+
+    approveBtns.forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            const requestId = btn.getAttribute('request_id');
+            const response = await fetch(`/staff/adoption_requests/${requestId}/status?status=accepted`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to approve request.');
+            }
+        });
+    });
+
+    rejectBtns.forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            const requestId = btn.getAttribute('request_id');
+            const response = await fetch(`/staff/adoption_requests/${requestId}/status?status=rejected`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to reject request.');
+            }
+        });
+    });
+    </script>
+{% endblock %}

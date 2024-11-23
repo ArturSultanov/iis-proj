@@ -1,8 +1,5 @@
 {% set title='animal profile' %}
 {% extends 'base.html' %}
-{% block title %}
-    {{ animal.name }}
-{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/animal_profile.css') }}">
@@ -36,10 +33,12 @@
             <button class="staff-btn create-request-btn" id="create-request">Create Vet Request</button>
         </div>
         {% endif %}
-
+        <div class="animal-profile-user-section">
+            <button class="user-btn adopt-btn" id="adopt-animal">Adopt</button>
+        </div>
         {% if user and user.is_volunteer %}
         <div class="animal-profile-volunteer-section">
-            <button class="staff-btn rsv-btn" id="reserve-animal">Reserve walk</button>
+            <button class="rsv-btn" id="reserve-animal">Reserve walk</button>
         </div>
         {% endif %}
         {% if user and user.is_vet %}
@@ -54,6 +53,13 @@
     {% if user %}
         <script>
             const animalId = "{{ animal.id }}";
+            // adopt animal button
+            const adoptBtn = document.getElementById('adopt-animal');
+            if (adoptBtn) {
+                adoptBtn.addEventListener('click', () => {
+                    window.location.href = `/user/adopt/${animalId}`;
+                });
+            }
         </script>
         {% if user.is_staff %}
             <script src="{{ url_for('static', path='js/animal/animal_profile_staff.js') }}"></script>
