@@ -1,3 +1,6 @@
+const statusDiv = document.getElementById('response-status');
+
+
 document.addEventListener('click', function(event) {
     if (event.target.classList.contains('cancel-button') && !event.target.disabled) {
         const walkId = event.target.dataset.walkId;
@@ -6,20 +9,20 @@ document.addEventListener('click', function(event) {
         })
         .then(response => {
             if (response.ok) {
-                // todo make div for status
-                // alert('Walk canceled successfully.');
-                window.location.reload();
+                statusDiv.innerHTML = 'Walk canceled successfully.';
+                // timeout to allow user to see success message
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
             } else {
                 response.json().then(data => {
-                    // todo make div for status
-                    // alert(`Error: ${data.detail}`);
+                    statusDiv.innerHTML = `Error: ${data.detail}`;
                 });
             }
         })
         .catch(error => {
-            // todo make div for status
-            // console.error('Error canceling walk:', error);
-            // alert('An error occurred while canceling the walk.');
+            console.error(`Error canceling walk:`, error);
+            statusDiv.innerHTML = 'An error occurred.';
         });
     }
 });

@@ -44,15 +44,13 @@ document.addEventListener('click', function(event) {
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    // todo
                     response.json().then(data => {
                         alert(`Error: ${data.detail}`);
                     });
                 }
             })
             .catch(error => {
-                // todo
-                console.error(`Error ${action}ing walk request:`, error);
+                console.error(`Error walk request:`, error);
                 alert('An error occurred.');
             });
         }

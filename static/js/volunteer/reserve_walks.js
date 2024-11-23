@@ -1,5 +1,6 @@
 let currentStartDate = new Date();
 const selectedSlots = new Set();
+const statusDiv = document.getElementById('response-status');
 
 /** Helper function to format date as 'YYYY-MM-DD' */
 const formatDate = (date) => {
@@ -113,8 +114,7 @@ const handleSlotClick = (event) => {
 /** Event handler for confirming reservation */
 const confirmReservation = () => {
     if (selectedSlots.size === 0) {
-        // todo fix this alert
-        // alert('No slots selected.');
+        statusDiv.textContent = 'Please select at least one slot';
         return;
     }
 
@@ -137,13 +137,14 @@ const confirmReservation = () => {
         }),
     }).then(response => {
         if (response.ok) {
-            // todo fix this alert
-            // alert('Reservation successful!');
-            window.location.href = `/volunteer/history`;
+            statusDiv.textContent = 'Walks reserved successfully';
+            // Timeout to allow the user to see the success message
+            setTimeout(() => {
+                window.location.href = `/volunteer/history`;
+            });
         } else {
             response.json().then(data => {
-                // todo fix this alert
-                // alert(`Failed to reserve walks: ${data.detail}`);
+                statusDiv.textContent = data.detail;
             });
         }
     });

@@ -17,8 +17,6 @@ class Role(enum.Enum):
     volunteer = 'volunteer'
     registered = 'registered'
 
-    # unregistered = 'unregistered' todo ??
-
     @classmethod
     def get_roles(cls) -> list[Self]:
         return [role for role in cls]
@@ -223,7 +221,7 @@ class TreatmentsOrm(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'),
-                                                    nullable=False)  # todo cascade delete
+                                                    nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
@@ -235,7 +233,7 @@ class VaccinationsOrm(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     medical_history_id: Mapped[int] = mapped_column(ForeignKey('medical_histories.id'),
-                                                    nullable=False)  # todo cascade delete
+                                                    nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     description: Mapped[Str2048] = mapped_column()
 
