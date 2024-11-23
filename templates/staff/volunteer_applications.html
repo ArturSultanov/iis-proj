@@ -40,7 +40,32 @@
 {% endblock %}
 
 {% block scripts %}
-    <script>
-
-    </script>
+<script>
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', async function() {
+            const [action, applicationId] = this.id.split('-');
+            const response = await fetch(`/staff/volunteer_applications/${applicationId}?status=${action}`, {
+                method: 'PATCH'
+            });
+            if (response.ok) {
+                const status = document.getElementById(`status-${applicationId}`);
+                const actionCapitalized = action.charAt(0).toUpperCase() + action.slice(1);
+                status.textContent = `Status: ${actionCapitalized}`;
+                // remove buttons
+                document.getElementById(`accepted-${applicationId}`).remove();
+                document.getElementById(`rejected-${applicationId}`).remove();
+            }
+        });
+    });
+</script>
+<script>
+    // keyboard arrow navigation
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowLeft' && document.getElementById('prev_page')) {
+            document.getElementById('prev_page').click();
+        } else if (event.key === 'ArrowRight' && document.getElementById('next_page')) {
+            document.getElementById('next_page').click();
+        }
+    });
+</script>
 {% endblock %}
