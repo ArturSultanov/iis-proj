@@ -60,6 +60,7 @@ create table adoption_requests
     animal_id int                                      not null,
     date      datetime                                 not null,
     status    enum ('pending', 'accepted', 'rejected') not null,
+    message   varchar(2048)                            null,
     constraint adoption_requests_ibfk_1
         foreign key (user_id) references users (id),
     constraint adoption_requests_ibfk_2

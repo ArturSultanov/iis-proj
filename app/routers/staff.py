@@ -1,5 +1,7 @@
+import io
 from datetime import datetime, timezone
 from typing import Annotated, Optional
+from PIL import Image
 
 from fastapi import APIRouter, Request, Form, UploadFile, Depends, HTTPException
 from fastapi.params import Query
@@ -17,6 +19,15 @@ staff_router = APIRouter(prefix="/staff",
                          tags=["staff"],
                          dependencies=[Depends(get_staff)])
 
+def compress_photo(photo: bytes):
+    """
+    Compresses a photo to a smaller size.
+    """
+    image = Image.open(io.BytesIO(photo))
+    image.thumbnail((500, 500))
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="JPEG", quality=70)
+    return image_bytes.getvalue()
 
 # Form to add a new animal
 class AnimalForm(BaseModel):
@@ -33,8 +44,9 @@ class AnimalForm(BaseModel):
             "species": self.species,
             "age": self.age,
             "description": self.description,
-            "photo": self.photo.file.read() if self.photo else None
+            "photo": compress_photo(self.photo.file.read()) if self.photo else None
         }
+
 
 
 @staff_router.get("/dashboard", status_code=HTTP_200_OK)
@@ -102,7 +114,7 @@ async def edit_animal_description(db: db_dependency, animal: animal_dependency, 
 
 @staff_router.patch("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def edit_animal_photo(db: db_dependency, animal: animal_dependency, photo: UploadFile = Form(None)):
-    animal.photo = photo.file.read() if photo else None
+    animal.photo = compress_photo(photo.file.read()) if photo else None
     db.commit()
     return {"message": "Photo updated successfully"}
 
