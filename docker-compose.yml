@@ -4,6 +4,9 @@ services:
   web:
     build: .
     container_name: iis_shelter
+    depends_on:
+      db:
+        condition: service_healthy
     env_file:
       - .env.template
     environment:
@@ -14,8 +17,6 @@ services:
       - "8000:8000"
     networks:
       - iis_shelter_net
-    depends_on:
-      - db
 
   db:
     image: mysql:5.7
@@ -27,6 +28,8 @@ services:
       MYSQL_DATABASE: iis
       MYSQL_USER: user
       MYSQL_PASSWORD: user
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
 
     ports:
       - "3306:3306"
