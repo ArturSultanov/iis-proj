@@ -10,6 +10,4 @@ pip install -r requirements.txt
 
 deactivate
 
-./setup_mysql.sh
-
 ./start.sh

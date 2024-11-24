@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ title }}</title>
+    <title>{{ title | capitalize }}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/header.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}">
@@ -34,6 +34,7 @@
 {% endif %}
 <!-- Custom scripts -->
 {% block scripts %}
+
 {% endblock %}
 <!-- End Scripts -->
 </html>

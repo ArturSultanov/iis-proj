@@ -50,17 +50,17 @@
 {% endblock %}
 
 {% block scripts %}
+    <script>
+        const animalId = "{{ animal.id }}";
+        // adopt animal button
+        const adoptBtn = document.getElementById('adopt-animal');
+        if (adoptBtn) {
+            adoptBtn.addEventListener('click', () => {
+                window.location.href = `/user/adopt/${animalId}`;
+            });
+        }
+    </script>
     {% if user %}
-        <script>
-            const animalId = "{{ animal.id }}";
-            // adopt animal button
-            const adoptBtn = document.getElementById('adopt-animal');
-            if (adoptBtn) {
-                adoptBtn.addEventListener('click', () => {
-                    window.location.href = `/user/adopt/${animalId}`;
-                });
-            }
-        </script>
         {% if user.is_staff %}
             <script src="{{ url_for('static', path='js/animal/animal_profile_staff.js') }}"></script>
         {% endif %}
