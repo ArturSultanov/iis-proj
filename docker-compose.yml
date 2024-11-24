@@ -29,7 +29,11 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: user
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # Test using tcp "tcp mysql_db:3306 -t 30s -i 250ms"
+        test: ["CMD", "tcp", "db:3306", "-t", "60s", "-i", "1s"]
+        interval: 60s
+        timeout: 30s
+        retries: 3
 
     ports:
       - "3306:3306"
