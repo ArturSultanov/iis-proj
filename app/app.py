@@ -1,37 +1,52 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import RedirectResponse
-from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER
-
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
+from starlette.status import HTTP_200_OK
 
 from app.config import settings
 from app.database import get_db, db_dependency, UsersOrm, Role, AnimalsOrm, create_all_tables
-from app.database import Base as dbBase
 from app.password import hash_password
 from app.routers import *
 from app.utils import session_dependency, templates
 
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_):
     # create all tables if not exists
     create_all_tables()
     # create a session to add the admin user if not exists
     start_db = next(get_db())
-    # dbBase.metadata.create_all(start_db.get_bind())
     # add admin user if not exists
     if not UsersOrm.get_user(start_db, "admin"):
         # add admin user with password "admin"
         start_db.add(UsersOrm(username="admin", name="admin", password=hash_password("admin"), role=Role.admin))
-        start_db.commit()
-        start_db.close()
+    if not UsersOrm.get_user(start_db, "staff"):
+        # add staff user with password "staff"
+        start_db.add(UsersOrm(username="staff", name="staff", password=hash_password("staff"), role=Role.staff))
+    if not UsersOrm.get_user(start_db, "vet"):
+        # add vet user with password "vet"
+        start_db.add(UsersOrm(username="vet", name="vet", password=hash_password("vet"), role=Role.vet))
+    if not UsersOrm.get_user(start_db, "volunteer"):
+        # add volunteer user with password "volunteer"
+        start_db.add(
+            UsersOrm(username="volunteer", name="volunteer", password=hash_password("volunteer"), role=Role.volunteer))
+    if not UsersOrm.get_user(start_db, "registered"):
+        # add user registered with password "registered"
+        start_db.add(UsersOrm(username="registered", name="registered", password=hash_password("registered"),
+                              role=Role.registered))
+    start_db.commit()
+    start_db.close()
     yield
 
+
 # Create the FastAPI app
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 # Add routers to the app
 app.include_router(user_router)
@@ -45,12 +60,25 @@ app.mount(settings.APP_STATIC_PATH, StaticFiles(directory="static"), name="stati
 
 # Add middleware to the app
 app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"]
-    )
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+
+@app.exception_handler(SQLAlchemyError)
+async def sqlalchemy_error_handler(request: Request, exc: SQLAlchemyError):
+    # Make a task to terminate the app after 30 seconds
+    os.system("sleep 30 && kill -9 " + str(os.getpid()) + " &")
+    # Return a response with the error
+    return templates.TemplateResponse("database_error.html",
+                                      {
+                                          "request": request,
+                                          "error": str(exc)
+                                      })
+
 
 @app.get("/", status_code=HTTP_200_OK)
 async def index_page(request: Request, session: session_dependency):
@@ -60,13 +88,14 @@ async def index_page(request: Request, session: session_dependency):
                                           "user": session.user
                                       })
 
+
 @app.get("/animals", status_code=HTTP_200_OK)
 async def animals_page(request: Request, db: db_dependency, session: session_dependency, page: int = 1):
     animals_list = db.query(AnimalsOrm).all()
     # sort animals by hidden status, so hidden animals will be displayed at the end
     animals_list.sort(key=lambda x: x.hidden)
     # slice the list to display only the animals on the current page
-    display_animals = animals_list[(page-1)*settings.PAGE_SIZE:page*settings.PAGE_SIZE]
+    display_animals = animals_list[(page - 1) * settings.PAGE_SIZE:page * settings.PAGE_SIZE]
     pages = len(animals_list) // settings.PAGE_SIZE + 1
     if page > pages or page < 1:
         # if the page is out of range, redirect to the first page
@@ -80,15 +109,14 @@ async def animals_page(request: Request, db: db_dependency, session: session_dep
                                           "page": page
                                       })
 
-# This is a placeholder photo that will be used if the animal does not have a photo
-placeholder_photo : bytes = open("static/no-image-available.jpg", "rb").read()
 
 @app.get("/animals/{animal_id}/photo", status_code=HTTP_200_OK)
 async def animal_photo(animal_id: int, db: db_dependency):
     animal = db.query(AnimalsOrm).filter(AnimalsOrm.id == animal_id).first()
     if not animal or not animal.photo:
-        return HTMLResponse(content=placeholder_photo, media_type="image/jpeg")
+        return RedirectResponse(url="/static/no-image-available.jpg")
     return HTMLResponse(content=animal.photo, media_type="image/jpeg")
+
 
 @app.get("/animals/{animal_id}/profile")
 async def animal_profile(request: Request, animal_id: int, db: db_dependency, session: session_dependency):
@@ -102,8 +130,9 @@ async def animal_profile(request: Request, animal_id: int, db: db_dependency, se
                                           "animal": animal
                                       })
 
+
 @app.get("/dashboard")
-async def dashboard(request: Request, session: session_dependency):
+async def dashboard(session: session_dependency):
     if not session.user:
         return RedirectResponse(url="/")
     if session.user.is_admin:
@@ -114,3 +143,9 @@ async def dashboard(request: Request, session: session_dependency):
         return RedirectResponse(url="/vet/dashboard")
     if session.user.is_volunteer:
         return RedirectResponse(url="/volunteer/dashboard")
+    return RedirectResponse(url="/")
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    return RedirectResponse(url="/static/favicon.ico")

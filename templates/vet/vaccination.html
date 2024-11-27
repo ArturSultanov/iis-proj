@@ -1,0 +1,37 @@
+{% set title='add vaccination' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="form">
+        <form id="vaccination_form">
+            <div class="container">
+                <label for="description">Description:</label><br>
+                <textarea name="description" id="description" required></textarea><br><br>
+            </div>
+            <div class="container">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required><br><br>
+            </div>
+            <div class="container">
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required><br><br>
+            </div>
+            <div class="container">
+                <button type="submit">Add Vaccination</button>
+            </div>
+        </form>
+    </div>
+    <div class="container">
+        <a href="/vet/medical_history_profile/{{ animal.id }}" class="link" style="padding-top: 10px">Back to Animal Medical Hitory</a>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const animalId = {{ animal.id }};
+    </script>
+    <script src="{{ url_for('static', path='js/vet/vaccinations.js') }}"></script>
+{% endblock %}

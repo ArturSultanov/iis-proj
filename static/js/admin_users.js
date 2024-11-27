@@ -68,12 +68,3 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
-
-// // if row clicked, redirect to user profile
-// document.addEventListener('click', function (event) {
-//     if (event.target.tagName === 'TD') {
-//         const userId = event.target.parentElement.getAttribute('id').split('-')[1];
-//         window.location.href = `/admin/users/${userId}`;
-//         // todo
-//     }
-// });

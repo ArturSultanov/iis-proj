@@ -1,0 +1,44 @@
+{% set title='walk history' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/scroll_table.css') }}">
+{% endblock %}
+{% block content %}
+    <div id="response-status"></div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Animal Name</th>
+                    <th>Date</th>
+                    <th>Duration</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for walk in walks %}
+                <tr>
+                    <td>{{ walk.animal.name }}</td>
+                    <td>{{ walk.date }}</td>
+                    <td>{{ walk.duration }} min</td>
+                    <td>{{ walk.location }}</td>
+                    <td>{{ walk.status.value | capitalize }}</td>
+                    <td>
+                        {% if walk.date > now and walk.status.value in ['pending', 'accepted'] %}
+                        <button class="cancel-button" data-walk-id="{{ walk.id }}" data-walk-date="{{ walk.date }}">Cancel</button>
+                        {% else %}
+                        <button class="cancel-button" disabled>Cancel</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', path='js/volunteer/history.js') }}"></script>
+{% endblock %}

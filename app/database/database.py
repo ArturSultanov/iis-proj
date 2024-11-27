@@ -1,8 +1,9 @@
-from typing import Annotated as typingAnnotated, Iterable, Generator
+from typing import Annotated as typingAnnotated, Generator
 
 from fastapi import Depends
 from sqlalchemy import create_engine, String
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
+
 from app.config import settings
 
 # Database engine
@@ -20,15 +21,18 @@ session_factory = sessionmaker(bind=engine)
 Str256 = typingAnnotated[str, String(256)]
 Str2048 = typingAnnotated[str, String(2048)]
 
+
 class Base(DeclarativeBase):
     type_annotation_map = {
         Str256: String(256),
         Str2048: String(2048)
     }
 
+
 # Function to create all tables in the database if they do not exist
 def create_all_tables():
     Base.metadata.create_all(engine)
+
 
 # Database connection generator
 def get_db() -> Generator[Session, None, None]:
@@ -39,6 +43,7 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         # close used the database session
         db.close()
+
 
 # Dependency to get the database session in the routers
 db_dependency = typingAnnotated[Session, Depends(get_db)]

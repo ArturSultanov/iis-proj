@@ -1,20 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
-    <style>
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-    </style>
-    <link rel="stylesheet" href="../../static/css/main.css">
-    <link rel="stylesheet" href="../../static/css/vertical_form.css">
-</head>
-<body>
+{% set title='signup' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/vertical_form.css') }}">
+{% endblock %}
+{% block content %}
     <h1>Create new user</h1>
     <form id="registerForm" class="vertical-form">
         <label for="name">Name:</label>
@@ -37,48 +26,7 @@
 
         <button type="submit">submit</button>
     </form>
-
-    <script>
-        // submit logic
-        document.getElementById('registerForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            // Collect form data
-            const formData = {
-                name: document.getElementById('name').value,
-                username: document.getElementById('username').value,
-                password: document.getElementById('password').value,
-                confirm_password: document.getElementById('confirm_password').value
-            };
-
-            // Send data as JSON
-            const response = await fetch('signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData) // Convert the form data to JSON
-            });
-
-            if (response.ok) {
-                window.location.href = '/user/signin';
-                localStorage.setItem('username', formData.username);
-                localStorage.setItem('password', formData.password);
-            } else {
-                const error = await response.json();
-                document.getElementById('errorMessages').textContent = error.detail || 'Registration failed';
-            }
-        });
-
-        // input validation
-        document.getElementById('registerForm').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirm_password = document.getElementById('confirm_password').value;
-            document.getElementById('errorMessages').textContent = '';
-            if (password !== confirm_password) {
-                document.getElementById('errorMessages').textContent = 'Passwords do not match';
-            }
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', path='js/signup.js') }}"></script>
+{% endblock %}

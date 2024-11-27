@@ -1,31 +1,13 @@
-#!/bin/bash
+# Create .venv and install dependencies
 
-echo "Clearing pycache..."
-find . -type d -name "__pycache__" -exec rm -rf {} +
+sudo apt install python3.12-venv
 
-# Check if a virtual environment already exists
-if [[ -d ".venv" ]]; then
-    echo "Environment already exists."
-else
-    echo "Creating a new virtual environment..."
-    python3 -m venv .venv
-fi
+python3.12 -m venv .venv
 
-# Check if the virtual environment is activated
-if [[ -z "$VIRTUAL_ENV" ]]; then
-    echo "Activating the virtual environment..."
-    source .venv/bin/activate
-fi
+source .venv/bin/activate
 
-# Install dependencies if requirements.txt exists
-if [[ -f "requirements.txt" ]]; then
-    echo "Installing dependencies from requirements.txt..."
-    pip install --upgrade pip
-    pip install -r requirements.txt
-else
-    echo "requirements.txt not found. Please make sure it is in the current directory."
-fi
+pip install -r requirements.txt
 
+deactivate
 
-# Keep the virtual environment activated in the current shell
-exec "$SHELL"
+./start.sh

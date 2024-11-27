@@ -1,0 +1,46 @@
+{% set title='new adoption' %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/horizontal_form.css') }}">
+{% endblock %}
+{% block content %}
+{% if not adopt_request %}
+    <h2>Adoption form for <a href="/animals/{{ animal.id }}/profile" class="link">{{ animal.name }}</a></h2>
+    <form class="horizontal-form" id="adoption-form">
+        <div class="horizontal-form-top">
+            <label for="message">Message:</label><br>
+            <textarea id="message" name="message" required></textarea><br>
+        </div>
+        <button type="submit">Adopt</button>
+    </form>
+{% else %}
+    <p>Adoption request sent.</p>
+    <p>Current status: <span class="{{ adopt_request.status.value }}">{{ adopt_request.status.value | upper }}</span></p>
+    <a href="/animals/{{ animal.id }}/profile" class="link content-link">Back</a>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+    <script>
+        // Send adoption request
+        document.getElementById('adoption-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            const animalId = "{{ animal.id }}";
+            const response = await fetch(`/user/adoptions/request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    animal_id: animalId
+                })
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to send adoption request.');
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,10 @@
+CREATE USER IF NOT EXISTS 'user'@'localhost' IDENTIFIED BY 'user';
+
+CREATE DATABASE IF NOT EXISTS iis;
+
+GRANT ALL PRIVILEGES ON iis.* TO 'user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+USE iis;
+

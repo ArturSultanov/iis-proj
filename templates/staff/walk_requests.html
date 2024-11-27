@@ -1,0 +1,69 @@
+{% set title='walk requests' %}
+{% extends 'base.html' %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/walk_requests.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/table.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="filter-container">
+        <label class="filter-label" for="status-filter">Filter by Status:</label>
+        <select id="status-filter" name="status-filter">
+            <option value="">All</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="accepted" {% if status_filter == 'accepted' %}selected{% endif %}>Accepted</option>
+            <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+            <option value="started" {% if status_filter == 'started' %}selected{% endif %}>Started</option>
+            <option value="finished" {% if status_filter == 'finished' %}selected{% endif %}>Finished</option>
+            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Animal Name</th>
+                    <th>Volunteer Name</th>
+                    <th>Date</th>
+                    <th>Duration (min)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for walk in walks %}
+                <tr>
+                    <td>{{ walk.animal.name }}</td>
+                    <td>{{ walk.user.name }}</td>
+                    <td>{{ walk.date }}</td>
+                    <td>{{ walk.duration }}</td>
+                    <td>{{ walk.status.value | capitalize }}</td>
+                    <td>
+                        {% if walk.status.value == 'pending' %}
+                            <button class="action-button accept-button" data-walk-id="{{ walk.id }}">Accept</button>
+                            <button class="action-button reject-button" data-walk-id="{{ walk.id }}">Reject</button>
+                        {% elif walk.status.value == 'accepted' %}
+                            <button class="action-button start-button" data-walk-id="{{ walk.id }}">Start</button>
+                            <button class="action-button cancel-button" data-walk-id="{{ walk.id }}">Cancel</button>
+                        {% elif walk.status.value == 'started' %}
+                            <button class="action-button finish-button" data-walk-id="{{ walk.id }}">Finish</button>
+                        {% else %}
+                            <span>No actions available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">No walks were found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', path='js/stuff/walk_requests.js') }}"></script>
+{% endblock %}

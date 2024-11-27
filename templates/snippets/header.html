@@ -1,7 +1,9 @@
 <header class="header">
     <div class="header-left">
         {% if title != 'home' %}
-        <button class="header-back-btn" id="header-back-btn" onclick="history.back()">Back</button>
+        <button class="header-back-btn" id="header-back-btn" onclick=
+                "history.back();localStorage.setItem('gotByBack', 'true');"
+        >Back</button>
         {% endif %}
     </div>
     <div class="header-center">
@@ -11,15 +13,18 @@
         <div class="header-dropdown-menu">
             <button class="header-dropdown-btn">&#9776;</button>
             <div class="header-dropdown-content">
+                {% if user and (not user.is_registered or user.is_admin) %}
+                    <a href="/dashboard" class="link">Dashboard</a>
+                {% endif %}
                 <a href="/" class="link">Home</a>
                 <a href="/animals" class="link">Animals</a>
                 {% if not user %}
-                <a href="/user/signup" class="link">Signup</a>
-                <a href="/user/signin" class="link">Signin</a>
+                    <a href="/user/signup" class="link">Signup</a>
+                    <a href="/user/signin" class="link">Signin</a>
                 {% endif %}
                 {% if user %}
-                <a href="/user/profile" class="link">Profile</a>
-                <button class="link logout logout-this" style="width: calc(100% - 20px)">Logout</button>
+                    <a href="/user/profile" class="link">Profile</a>
+                    <button class="link logout logout-this" style="width: calc(100% - 20px)">Logout</button>
                 {% endif %}
             </div>
         </div>

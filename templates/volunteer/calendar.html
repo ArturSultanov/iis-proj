@@ -1,0 +1,57 @@
+{% set title='Reserve Walks' %}
+
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div id="response-status"></div>
+    <div class="calendar-controls">
+        <button id="prev-week">Previous Week</button>
+        <span id="week-dates"></span>
+        <button id="next-week">Next Week</button>
+    </div>
+
+    <div class="calendar">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                        <th>{{ day }}<br><span class="date-header"></span></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for hour in range(8, 21) %}
+                <tr>
+                    <td>{{ "%02d:00" % hour }}</td>
+                    {% for _ in range(7) %}
+                        <td class="time-slot" data-hour="{{ "%02d:00" % hour }}"></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="location-selector-container">
+        <label for="location">Location:</label>
+        <select id="location">
+            <option value="Shelter">Shelter</option>
+            <option value="Park">Park</option>
+            <option value="Home">Home</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <button id="confirm">Confirm</button>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const animalId = "{{ animal.id }}";
+    </script>
+    <script src="{{ url_for('static', path='js/volunteer/reserve_walks.js') }}"></script>
+{% endblock %}

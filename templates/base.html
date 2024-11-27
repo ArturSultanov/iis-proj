@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ title }}</title>
+    <title>{{ title | capitalize }}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/header.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}">
@@ -19,11 +19,22 @@
 </body>
 <!-- Scripts -->
 <!-- Default scripts -->
+<script>
+    window.onpageshow = function(event) {
+        const flag = localStorage.getItem('gotByBack');
+        if (flag === 'true') {
+            localStorage.removeItem('gotByBack');
+            location.reload();
+            console.log('reloaded');
+        }
+    };
+</script>
 {% if user %}
-<script src="{{ url_for('static', path='logout.js') }}"></script>
+<script src="{{ url_for('static', path='js/logout.js') }}"></script>
 {% endif %}
 <!-- Custom scripts -->
 {% block scripts %}
+
 {% endblock %}
 <!-- End Scripts -->
 </html>

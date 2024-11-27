@@ -4,7 +4,10 @@
     <p>Welcome, <span id="name">{{ user.name }}</span></p>
     <p>Your role: <span id="role">{{ user.role }}</span></p>
 
-    <a href="/dashboard" class="link content-link">Dashboard</a><br>
+    {% if not user.is_registered or user.is_admin %}
+        <a href="/dashboard" class="link content-link">Dashboard</a><br>
+    {% endif %}
+    <a href="/user/adoptions" class="link content-link">My adoptions</a><br>
     <a href="/user/change_password" class="link content-link">Change password</a><br>
 
     {% if user.is_registered %}

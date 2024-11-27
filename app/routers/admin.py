@@ -9,6 +9,7 @@ admin_router = APIRouter(prefix="/admin",
                          tags=["admin"],
                          dependencies=[Depends(get_admin)])
 
+
 # Validation function to check if the user can be modified
 def validate_user_operation(user: UsersOrm, admin: UsersOrm):
     if not user:
@@ -24,7 +25,8 @@ async def admin_page(request: Request, admin: admin_dependency):
     return templates.TemplateResponse("admin/dashboard.html",
                                       {
                                           "request": request,
-                                          "admin": admin
+                                          "admin": admin,
+                                          "user": admin
                                       })
 
 
@@ -35,6 +37,7 @@ async def users_page(request: Request, db: db_dependency, admin: admin_dependenc
                                       {
                                           "request": request,
                                           "admin": admin,
+                                          "user": admin,
                                           "users": users,
                                           "roles": Role.get_roles()
                                       })

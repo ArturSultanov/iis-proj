@@ -1,20 +1,14 @@
-{% set title = "Home" %}
+{% set title = "home" %}
 {% extends 'base.html' %}
-{% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }} - Animal Shelter</title>
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/index.css') }}">
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <div class="container">
         <section id="header">
             <h1>ANIMAL SHELTER</h1>
         </section>
     </div>
-
     <div class="container">
         <section id="book">
             <h2>Meet and take your new friend for a walk!</h2>
@@ -22,7 +16,6 @@
             <a href="/animals" class="link">Check out our animals</a>
         </section>
     </div>
-
     <footer class="footer">
         <div class="footer-container">
             <div class="about">
@@ -36,6 +29,4 @@
             </div>
         </div>
     </footer>
-</body>
-</html>
 {% endblock %}
