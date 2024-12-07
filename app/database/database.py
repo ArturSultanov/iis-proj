@@ -11,7 +11,8 @@ engine = create_engine(
     url=settings.database_url,
     echo=settings.SQL_ALCHEMY_DEBUG,
     pool_size=10,
-    max_overflow=10
+    max_overflow=10,
+    pool_pre_ping=True
 )
 
 # Session factory for the database
